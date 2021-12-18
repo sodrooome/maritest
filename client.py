@@ -13,14 +13,14 @@ limitations under the License.
 
 Initial code: Ryan Febriansyah, 03-12-2021
 """
-
 import logging
 import requests
 import warnings
 import urllib3
 from requests.sessions import session
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 from contextlib import contextmanager
-
 
 # For our purposes,
 # its only supported 5 HTTP method
@@ -32,11 +32,15 @@ get_specific_logger = logging.getLogger("Maritest Logger")
 # TODO: separate this function calls
 @contextmanager
 def disable_warnings():
-    # thanks stack overflow
-    # see at: https://stackoverflow.com/questions/27981545/suppress-insecurerequestwarning-unverified-https-request-is-being-made-in-pytho
+    # thanks stack overflow see at: https://stackoverflow.com/questions/27981545/suppress-insecurerequestwarning
+    # -unverified-https-request-is-being-made-in-pytho
     with warnings.catch_warnings():
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         yield None
+
+
+def response_hook(response: requests.Response, *args, **kwargs):
+    return response.raise_for_status(), *args, kwargs
 
 
 class Http:
@@ -51,6 +55,8 @@ class Http:
         headers: dict,
         allow_redirects: bool = None,
         logger: bool = True,
+        event_hooks: bool = False,
+        retry: bool = True,
         **kwargs,
     ) -> None:
         # missing attributes :
@@ -122,7 +128,7 @@ class Http:
         if self.method is None:
             self.method = method
         elif self.method not in [index for index in ALLOWED_METHODS]:
-            return f"Currently that method not supported {self.method}"
+            print(f"Currently that method not supported {self.method}")
 
         if self.response is None:
             self.response = requests.Response
@@ -167,6 +173,18 @@ class Http:
             # temporary disable the warning message
             # about certificate issues
             with requests.Session() as s, disable_warnings():
+                if retry:
+                    self.retry = Retry(
+                        total=3,
+                        status_forcelist=[429, 500, 502, 503, 504],
+                        method_whitelist=["GET", "POST"],
+                        backoff_factor=0.3,
+                    )
+                    adapter = HTTPAdapter(max_retries=self.retry)
+                    s.mount("https://", adapter)
+                    s.mount("http://", adapter)
+                else:
+                    self.logger.info("[INFO] HTTP retry method might be turned it off")
                 self.response = s.send(
                     request=prepare_request, timeout=self.timeout, **kwargs
                 )
@@ -183,9 +201,14 @@ class Http:
 
         self.logger.info(f"[INFO] HTTP Response {self.response.status_code}")
         self.logger.debug(f"[DEBUG] HTTP Response Header {self.response.headers}")
-        self.logger.debug(f"[DEBUG] HTTP Response Content {self.response.content}")
+        # self.logger.debug(f"[DEBUG] HTTP Response Content {self.response.content}")
 
-        return None
+        if event_hooks:
+            # if event hooks was set to True
+            # call the valid response name instead
+            # only call the message from related assertion
+            self.response.raise_for_status()
+            s.hooks["response"] = [response_hook]
 
     def __str__(self) -> str:
         if self.method and self.url is not None:
@@ -322,11 +345,22 @@ class Http:
     def assert_status_code_in(self, status_code: str, message: str):
         expected_result = [str(code) for code in status_code]
         actual_result = str(self.response.status_code)
-        if actual_result not in expected_result:
+        if actual_result in expected_result:
+            return print(message)
+        else:
             message = "The expected status code didn't match with actual result"
             raise AssertionError(message)
-        else:
+
+    def assert_status_code_not_in(self, status_code: str, message: str):
+        expected_result = [str(code) for code in status_code]
+        actual_result = str(self.response.status_code)
+        if actual_result not in expected_result:
             return print(message)
+        else:
+            message = (
+                "The expected status code (actually) did matched with actual result"
+            )
+            raise AssertionError(message)
 
     def assert_json_to_equal(self, obj, message: str):
         if self.response.json in [value for value in obj]:
@@ -356,18 +390,18 @@ class Http:
             message = "The duration exceeds the limit"
             raise AssertionError(message)
 
-    def assert_is_text(self, object: str, message: str):
+    def assert_is_text(self, obj: str, message: str):
         if self.response.text:
-            return print(isinstance(object, str))
+            return print(isinstance(obj, str)), message
         else:
-            message = f"Str type doesn't match with {object}"
+            message = f"Str type doesn't match with {obj}"
             raise AssertionError(message)
 
-    def assert_is_dict(self, object: dict, message: str):
+    def assert_is_dict(self, obj: dict, message: str):
         if self.response.json:
-            return print(isinstance(object, dict))
+            return print(isinstance(obj, dict)), message
         else:
-            message = f"Dict type doesn't match with {object}"
+            message = f"Dict type doesn't match with {obj}"
             raise AssertionError(message)
 
     # TODO: write assertion for validating JSON body
