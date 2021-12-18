@@ -26,6 +26,8 @@ from contextlib import contextmanager
 # its only supported 5 HTTP method
 ALLOWED_METHODS = ["GET", "PUT", "POST", "DELETE", "PATCH"]
 
+get_specific_logger = logging.getLogger("Maritest Logger")
+
 
 # TODO: separate this function calls
 @contextmanager
@@ -47,8 +49,8 @@ class Http:
         method: str,
         url: str,
         headers: dict,
-        log: bool = None,
         allow_redirects: bool = None,
+        logger: bool = True,
         **kwargs,
     ) -> None:
         # missing attributes :
@@ -56,7 +58,31 @@ class Http:
         self.method = method
         self.url = url
         self.headers = headers
-        self.log = log
+
+        if logger:
+            self.logger = get_specific_logger
+            self.logger.propagate = False
+            self.logger.setLevel(logging.DEBUG)
+
+            # handler the logging event
+            # and write the standart output
+            logger_output = logging.StreamHandler()
+            logger_output.setLevel(logging.DEBUG)
+
+            # format the standart output
+            # with timestamp of event, class name and levels
+            logger_formatter = logging.Formatter(
+                fmt="%(asctime)s : %(name)s : %(funcName)s : %(message)s",
+                datefmt="%d-%m-%Y %I:%M:%S",
+            )
+
+            logger_output.setFormatter(logger_formatter)
+            self.logger.addHandler(logger_output)
+        else:
+            # if logger wasn't setup
+            # only get the specific logger name
+            self.logger = get_specific_logger
+
         self.timeout = None
         self.response = None
         self.json = None
@@ -79,9 +105,11 @@ class Http:
                 "Something error, perhaps requests package not installed?"
             )
 
-        if log:
-            logging.info(f"[INFO] HTTP Request {self.method} | {self.url}")
-            logging.debug(msg=message)
+        if logger:
+            # why the heck am i validate
+            # the logger twice ??
+            self.logger.info(f"[INFO] HTTP Request {self.method} | {self.url}")
+            self.logger.debug(msg=message)
 
         if self.headers is None:
             # enforcing headers alwasy
@@ -153,8 +181,9 @@ class Http:
         finally:
             pass
 
-        logging.info(f"[INFO] HTTP Response {self.response.status_code}")
-        logging.debug(f"[DEBUG] HTTP Response Header {self.response.headers}")
+        self.logger.info(f"[INFO] HTTP Response {self.response.status_code}")
+        self.logger.debug(f"[DEBUG] HTTP Response Header {self.response.headers}")
+        self.logger.debug(f"[DEBUG] HTTP Response Content {self.response.content}")
 
         return None
 
