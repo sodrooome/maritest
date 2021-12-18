@@ -180,6 +180,32 @@ class Http:
         # after send the final request
         self.response.close()
 
+    # add setter-getter only for
+    # base_url or HTTP method
+    @property
+    def url(self) -> str:
+        return self._url
+
+    @url.setter
+    def url(self, value: str) -> str:
+        self._url = value
+
+    @url.deleter
+    def url(self) -> None:
+        del self._url
+
+    @property
+    def method(self):
+        return self._method
+
+    @method.setter
+    def method(self, value: str) -> str:
+        self._method = value
+
+    @method.deleter
+    def method(self) -> None:
+        del self._method
+
     # this one act as an
     # instances for assertion tests
     # that have similar function like in pytest, unittest
@@ -299,6 +325,20 @@ class Http:
             return print(message)
         else:
             message = "The duration exceeds the limit"
+            raise AssertionError(message)
+
+    def assert_is_text(self, object: str, message: str):
+        if self.response.text:
+            return print(isinstance(object, str))
+        else:
+            message = f"Str type doesn't match with {object}"
+            raise AssertionError(message)
+
+    def assert_is_dict(self, object: dict, message: str):
+        if self.response.json:
+            return print(isinstance(object, dict))
+        else:
+            message = f"Dict type doesn't match with {object}"
             raise AssertionError(message)
 
     # TODO: write assertion for validating JSON body
