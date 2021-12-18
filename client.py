@@ -16,7 +16,10 @@ Initial code: Ryan Febriansyah, 03-12-2021
 
 import logging
 import requests
+import warnings
+import urllib3
 from requests.sessions import session
+from contextlib import contextmanager
 
 
 # For our purposes,
@@ -24,12 +27,30 @@ from requests.sessions import session
 ALLOWED_METHODS = ["GET", "PUT", "POST", "DELETE", "PATCH"]
 
 
+# TODO: separate this function calls
+@contextmanager
+def disable_warnings():
+    # thanks stack overflow
+    # see at: https://stackoverflow.com/questions/27981545/suppress-insecurerequestwarning-unverified-https-request-is-being-made-in-pytho
+    with warnings.catch_warnings():
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        yield None
+
+
 class Http:
     """
     This is a base class for HTTP client
     """
 
-    def __init__(self, method: str, url: str, headers: dict, log: bool = None) -> None:
+    def __init__(
+        self,
+        method: str,
+        url: str,
+        headers: dict,
+        log: bool = None,
+        allow_redirects: bool = None,
+        **kwargs,
+    ) -> None:
         # missing attributes :
         # session, certs, file, json, data
         self.method = method
@@ -38,6 +59,15 @@ class Http:
         self.log = log
         self.timeout = None
         self.response = None
+        self.json = None
+        self.data = None
+        self.params = None
+        self.files = None
+        self.proxies = None
+        self.allow_redirects = allow_redirects
+        self.stream = False
+        self.cert = None
+        self.verify = False  # by default set to False due staging environment
 
         # re-write this message
         # the output still returned as
@@ -69,17 +99,49 @@ class Http:
         if self.response is None:
             self.response = requests.Response
 
+        if self.data is None:
+            self.data = {}
+
+        if self.params is None:
+            self.params = {}
+
+        if self.proxies is None:
+            self.proxies = {}
+
         # wrap it our request
         # and prepare it first before
         # send it immediately
         request = requests.Request(
-            method=self.method, url=self.url, headers=self.headers
+            method=self.method,
+            url=self.url,
+            headers=self.headers,
+            params=self.params,
+            data=self.data,
+            json=self.json,
+            files=self.files,
         )
         prepare_request = request.prepare()
 
+        # before final request, check
+        # whether environment has proxies protocol or not
+        # if yes, then merged it as one
+        update_request = requests.Session().merge_environment_settings(
+            url=self.url,
+            proxies=self.proxies,
+            stream=self.stream,
+            verify=self.stream,
+            cert=self.cert,
+        )
+        kwargs = {"allow_redirects": self.allow_redirects}
+        kwargs.update(update_request)
+
         try:
-            with requests.Session() as s:
-                self.response = s.send(request=prepare_request, timeout=self.timeout)
+            # temporary disable the warning message
+            # about certificate issues
+            with requests.Session() as s, disable_warnings():
+                self.response = s.send(
+                    request=prepare_request, timeout=self.timeout, **kwargs
+                )
         except requests.exceptions.Timeout as e:
             # temporary using requests exception
             # TODO: make base class for custom exceptio
@@ -155,7 +217,7 @@ class Http:
 
     def assert_is_2xx_status(self, message: str):
         if self.response.status_code < 300:
-            return print(message)
+            return print(message, f"The status code was : {self.response.status_code}")
         else:
             message = "The status got 2xx"
             raise AssertionError(message)
