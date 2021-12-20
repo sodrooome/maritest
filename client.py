@@ -82,7 +82,7 @@ class Http:
         """
         # missing attributes :
         # session, certs, file, json, data
-        self.method = method
+        self.method = method.upper()
         self.url = url
         self.headers = headers
 
@@ -120,7 +120,9 @@ class Http:
         self.allow_redirects = allow_redirects
         self.stream = False
         self.cert = None
-        self.suppress_warning = supress_warning  # by default set to True due staging environment
+        self.suppress_warning = (
+            supress_warning  # by default set to True due staging environment
+        )
         self.verify = None
 
         # re-write this message
@@ -322,6 +324,15 @@ class Http:
         # to body information
         if not self.response.headers["Content-Type"]:
             message = "Perhaps 'content-type' wasn't set"
+            raise AssertionError(message)
+        else:
+            return print(message)
+
+    def assert_content_type_to_equal(self, value: str, message: str):
+        # validate expected content-type
+        # with actual result in response
+        if value != self.response.headers["Content-Type"]:
+            message = "The value of content-type doesn't match with the actual result"
             raise AssertionError(message)
         else:
             return print(message)
