@@ -57,8 +57,29 @@ class Http:
         logger: bool = True,
         event_hooks: bool = False,
         retry: bool = True,
+        supress_warning: bool = True,
         **kwargs,
     ) -> None:
+        """
+        Constructur for request HTTP target, with
+        several parameter to construct it :
+        :param method: HTTP method verb, string type
+        :param url: base url for HTTP target, string type
+        :param headers: HTTP content headers, by default always
+        set to dict object
+        :param allow_redirects: Enable redirection to other
+        HTTP target if previous one wasn't respond it. set None
+        :param logger: Logger stream handler with formatted
+        output of message, by default set True
+        :param event_hooks: Given valid response, by default
+        set to False
+        :param retry: Enable retry mechanism with default total
+        attempts up-to 3, by default set to True
+        :param suppress_warning: Verification of SSL certificate, if
+        set True, will suppressed warning message
+        :param kwargs: given by keyword argument
+        Returned as HTTP response
+        """
         # missing attributes :
         # session, certs, file, json, data
         self.method = method
@@ -99,7 +120,8 @@ class Http:
         self.allow_redirects = allow_redirects
         self.stream = False
         self.cert = None
-        self.verify = False  # by default set to False due staging environment
+        self.suppress_warning = supress_warning  # by default set to True due staging environment
+        self.verify = None
 
         # re-write this message
         # the output still returned as
@@ -127,7 +149,8 @@ class Http:
 
         if self.method is None:
             self.method = method
-        elif self.method not in [index for index in ALLOWED_METHODS]:
+
+        if self.method not in [index for index in ALLOWED_METHODS]:
             print(f"Currently that method not supported {self.method}")
 
         if self.response is None:
@@ -141,6 +164,15 @@ class Http:
 
         if self.proxies is None:
             self.proxies = {}
+
+        if supress_warning:
+            self.suppress_warning = True
+            self.logger.warning("[WARNING] SSL verification status is disabled")
+        else:
+            # move disable warnings in here
+            disable_warnings()
+            self.suppress_warning = False
+            self.logger.info("[INFO] SSL verification status is enabled")
 
         # wrap it our request
         # and prepare it first before
@@ -163,16 +195,14 @@ class Http:
             url=self.url,
             proxies=self.proxies,
             stream=self.stream,
-            verify=self.stream,
+            verify=self.suppress_warning,
             cert=self.cert,
         )
         kwargs = {"allow_redirects": self.allow_redirects}
         kwargs.update(update_request)
 
         try:
-            # temporary disable the warning message
-            # about certificate issues
-            with requests.Session() as s, disable_warnings():
+            with requests.Session() as s:
                 if retry:
                     self.retry = Retry(
                         total=3,
@@ -226,6 +256,9 @@ class Http:
             and self.timeout == other.timeout
             and self.response == other.response
         )
+
+    def __enter__(self):
+        return self
 
     def __exit__(self):
         # exit the connection pooling
@@ -294,7 +327,7 @@ class Http:
             return print(message)
 
     def assert_is_2xx_status(self, message: str):
-        if self.response.status_code < 300:
+        if 200 <= self.response.status_code < 300:
             return print(message, f"The status code was : {self.response.status_code}")
         else:
             message = "The status got 2xx"
