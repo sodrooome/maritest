@@ -1,6 +1,6 @@
 ## Maritest
 
-Maritest is an API testing framework that is used internally in the MauKerja tester team which aims to make it easier for QA to make assertions when doing the API testing layer. The writing design for test script itself is highly influence by Postman test script scenario (you can refer to this [one](https://learning.postman.com/docs/writing-scripts/script-references/test-examples/#testing-response-body))
+Maritest is an API testing framework that is used internally in the MauKerja tester team which aims to make it easier for QA to make assertions when doing the testing in API layer. The writing design for test script itself is highly influence by Postman test script scenario (you can refer to this [one](https://learning.postman.com/docs/writing-scripts/script-references/test-examples/#testing-response-body))
 
 ### Rationale
 
@@ -44,6 +44,10 @@ class TestApiB:
 ### Limitation
 
 The main concern is about since our assertion is only limited to the assertions that we have defined previously, so it is very difficult to create and leveraging other custom validations such as parameterization, mocking, stubbing or so on. Other than that, another problem is when you want to do custom validation in a complex response body or want to validate the data type of an object
+
+### Installation
+
+**TBD**
 
 ### Basic Usage
 
@@ -112,6 +116,31 @@ request = Http(..., logger=True) # enable this logger
 > 19-12-2021 12:12:31 : Maritest Logger : __init__ : [INFO] HTTP Response 200
 ```
 
+- Suppressed warning message about SSL. Particulary, this one is not advise to do it, its strongly advise to add certification path
+
+```python
+from client import Http
+
+# if enable this, then warning message
+# about unverified request will be hide
+request = Http(..., suppress_warning=True) 
+```
+
+- Integrate with other Python test framework, for example would be integrate with Pytest. After write this example, just run it with `pytest` command
+
+```python
+class TestA:
+    def test_services(self):
+        # usually, common assertion that use for
+        # API testing is against (or validate) for :
+        # status code, headers, response time, body, etc
+        request = Http("GET", "https://jsonplaceholder.typicode.com/posts", None)
+        request.assert_is_2xx_status(message="sukses")
+        request.assert_is_content_type(message="sukses")
+        request.assert_is_headers(message="sukses") 
+        request.assert_response_time(duration=200, message="sukses") # check response time for calling API
+```
+
 ### Upcoming Features
 
 - [x] Allow redirects and checking up for certs
@@ -119,3 +148,4 @@ request = Http(..., logger=True) # enable this logger
 - [ ] Assertion for data type of object (could it be Array properties, dict, etc)
 - [ ] Decorators for storing testing events (from start - finish)
 - [ ] Several enhancements and improvements from missing property in HTTP client
+- [ ] Error message improvements in assertion test and parameter customization
