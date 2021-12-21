@@ -30,7 +30,7 @@ And thus it becomes problematic when there are many test scenarios that need to 
 ```python
 class TestApiB:
     def test_services_a(self):
-        request = Http("GET", "base_url", headers)
+        request = Assert("GET", "base_url", headers)
 
         # directly instantiate the assertion
         # with existing error message or custom message
@@ -54,9 +54,9 @@ The main concern is about since our assertion is only limited to the assertions 
 Basic usage for using **Maritest** its just declare like using normal variable without create new class for that 
 
 ```python
-from client import Http
+from maritest.assertion import Assert
 
-request = Http("GET", "http://localhost", {"key":"value"})
+request = Assert("GET", "http://localhost", {"key":"value"})
 request.assert_is_2xx_status(message="sukses")
 request.assert_is_dict(message="sukses")
 ```
@@ -77,9 +77,9 @@ advanced use cases will depend on that. For example
 - Leveraging request hooks
 
 ```python
-from client import Http
+from maritest.assertion import Assert
 
-request = Http(..., event_hooks=True) # enable event hooks
+request = Assert(..., event_hooks=True) # enable event hooks
 
 # using normal assertion will return like this
 > AssertionError: The status got 4xx
@@ -91,9 +91,9 @@ request = Http(..., event_hooks=True) # enable event hooks
 - Using retry instead timeout mechanism
 
 ```python
-from client import Http
+from maritest.assertion import Assert
 
-request = Http(..., retry=True) # enable this retry
+request = Assert(..., retry=True) # enable this retry
 
 # there's indicator that we're using retry
 # if we also set the logger parameter to True
@@ -103,9 +103,9 @@ request = Http(..., retry=True) # enable this retry
 - Enable logger stream handler
 
 ```python
-from client import Http
+from maritest.assertion import Assert
 
-request = Http(..., logger=True) # enable this logger
+request = Assert(..., logger=True) # enable this logger
 
 # without logger
 > The status code was : 200
@@ -119,11 +119,11 @@ request = Http(..., logger=True) # enable this logger
 - Suppressed warning message about SSL. Particulary, this one is not advise to do it, its strongly advise to add certification path
 
 ```python
-from client import Http
+from maritest.assertion import Assert
 
 # if enable this, then warning message
 # about unverified request will be hide
-request = Http(..., suppress_warning=True) 
+request = Assert(..., suppress_warning=True) 
 ```
 
 - Integrate with other Python test framework, for example would be integrate with Pytest. After write this example, just run it with `pytest` command
