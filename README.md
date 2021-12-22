@@ -43,7 +43,7 @@ class TestApiB:
 
 ### Limitation
 
-The main concern is about since our assertion is only limited to the assertions that we have defined previously, so it is very difficult to create and leveraging other custom validations such as parameterization, mocking, stubbing or so on. Other than that, another problem is when you want to do custom validation in a complex response body or want to validate the data type of an object
+The main concern is about since our assertion is only limited to the assertions that we have defined previously, so it is very difficult to create and leveraging other assertion scenario that we wanted. Other than that, another problem is when you want to do custom validation in a complex response body or want to validate the data type of an object
 
 ### Installation
 
