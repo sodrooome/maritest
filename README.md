@@ -143,9 +143,7 @@ class TestA:
 
 ### Upcoming Features
 
-- [x] Allow redirects and checking up for certs
-- [x] Handling connection timeout
+- [x] Allow redirects, handling connection timeout and backoff mechanism
 - [ ] Assertion for data type of object (could it be Array properties, dict, etc)
-- [ ] Decorators for storing testing events (from start - finish)
 - [ ] Several enhancements and improvements from missing property in HTTP client
 - [ ] Error message improvements in assertion test and parameter customization
