@@ -141,7 +141,29 @@ class TestA:
         request.assert_response_time(duration=200, message="sukses") # check response time for calling API
 ```
 
-### Upcoming Features
+- Create customization assertion for your own. For this one, you can achieve it with inherited `Http` base class and afterwads. For example :
+
+```python
+from maritest.http import Http
+
+
+class CustomAssertion(Http):
+    def assert_tls_secure(self):
+        # this method validate whether
+        # the protocol is valid or not
+        if self.url.startswith("http://"):
+            raise AssertionError("do your own message")
+        elif self.url.startswith("https://"):
+            return print("do it again")
+        else:
+            ...
+
+# leverage your custom assertion
+request = CustomAssertion("GET", "do something about it", {"headers":"headers_value"})
+request.assert_tls_secure()
+```
+
+### Features
 
 - [x] Allow redirects, handling connection timeout and backoff mechanism
 - [ ] Assertion for data type of object (could it be Array properties, dict, etc)
