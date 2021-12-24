@@ -59,11 +59,13 @@ class Http:
         event_hooks: bool = False,
         retry: bool = True,
         supress_warning: bool = True,
+        proxies: dict = None,
         **kwargs,
     ) -> None:
         """
         Constructur for request HTTP target, with
         several parameter to construct it :
+
         :param method: HTTP method verb, string type
         :param url: base url for HTTP target, string type
         :param headers: HTTP content headers, by default always
@@ -78,7 +80,10 @@ class Http:
         attempts up-to 3, by default set to True
         :param suppress_warning: Verification of SSL certificate, if
         set True, will suppressed warning message
+        :param proxies: HTTP proxies configuration, by default
+        always set to None, and must be configured in HTTPS
         :param kwargs: given by keyword argument
+
         Returned as HTTP response
         """
         # missing attributes :
@@ -121,7 +126,7 @@ class Http:
         self.data = None
         self.params = None
         self.files = None
-        self.proxies = None
+        self.proxies = proxies
         self.allow_redirects = allow_redirects
         self.stream = False
         self.cert = None
@@ -152,7 +157,7 @@ class Http:
             self.headers = {}
 
         if self.timeout is None:
-            self.timeout = 10
+            self.timeout = 120
 
         if method is not None:
             self.method = method.upper()
@@ -169,8 +174,18 @@ class Http:
         if self.params is None:
             self.params = {}
 
-        if self.proxies is None:
-            self.proxies = {}
+        # by default, using proxies only
+        # for HTTPS over HTTP connection
+        if proxies is not None:
+            if "https" not in [key for key in self.proxies.keys()]:
+                raise ConnectionError(
+                    "Proxy connection must be configured HTTPS over HTTP"
+                )
+            else:
+                # elsewhere, update the new conf
+                # for proxy before merge into request
+                # TODO: differentiate the sessions attribute itself
+                self.proxies = requests.Session().proxies.update(proxies)
 
         if supress_warning:
             self.suppress_warning = True
@@ -252,7 +267,7 @@ class Http:
             return f"You're using Maritest with HTTP Request {self.url} | {self.method}"
 
     def __repr__(self) -> str:
-        return f"<Http:{self.method}=>{self.url}"
+        return f"<Http:{self.method}=>{self.url}>"
 
     def __eq__(self, other) -> bool:
         return (

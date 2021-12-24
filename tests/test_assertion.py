@@ -8,42 +8,33 @@ class TestHttpAssertion(unittest.TestCase):
     def test_assert_failed(self):
         # this test case supposed to be failed
         request = Assert(
-            "GET",
-            "https://jsonplaceholder.typicode.com/posts",
-            {"some_key": "some_value"},
-            None,
-            False,
-            False,
-            True,
-            True,
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
         )
         request.assert_is_failed("should be failed")
         request.assert_is_4xx_status("404 status perhaps?")
 
     def test_assert_success(self):
         request = Assert(
-            "GET",
-            "https://jsonplaceholder.typicode.com/posts",
-            {"some_key": "some_value"},
-            None,
-            False,
-            False,
-            True,
-            True,
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
         )
         request.assert_is_2xx_status("Status was raised")
         request.assert_is_ok("it's okay")
 
     def test_assert_content_type(self):
         request = Assert(
-            "GET",
-            "https://jsonplaceholder.typicode.com/posts",
-            {"some_key": "some_value"},
-            None,
-            False,
-            False,
-            True,
-            True,
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
         )
         request.assert_content_type_to_equal(
             "application/json; charset=utf-8", "sukses"
@@ -54,14 +45,11 @@ class TestHttpAssertion(unittest.TestCase):
 
     def test_assert_response(self):
         request = Assert(
-            "GET",
-            "https://jsonplaceholder.typicode.com/posts",
-            {"some_key": "some_value"},
-            None,
-            False,
-            False,
-            True,
-            True,
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
         )
         request.assert_is_has_content("yeah it has content")
         request.assert_is_has_json("yeah, it must be right?")
@@ -70,14 +58,11 @@ class TestHttpAssertion(unittest.TestCase):
 
     def test_assert_other_assertion(self):
         request = Assert(
-            "GET",
-            "https://jsonplaceholder.typicode.com/posts",
-            {"some_key": "some_value"},
-            None,
-            False,
-            False,
-            True,
-            True,
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
         )
         request.assert_response_time(200, "should be not exceed the limit")
         request.assert_status_code_in(
@@ -87,14 +72,11 @@ class TestHttpAssertion(unittest.TestCase):
 
     def test_assert_to_equal(self):
         request = Assert(
-            "GET",
-            "https://jsonplaceholder.typicode.com/posts/100",
-            {"some_key": "some_value"},
-            None,
-            False,
-            False,
-            True,
-            True,
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/100",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
         )
         expected_body = {
             "userId": 10,
@@ -108,30 +90,24 @@ class TestHttpAssertion(unittest.TestCase):
 
     def test_assert_type_to_equal(self):
         request = Assert(
-            "GET",
-            "https://jsonplaceholder.typicode.com/posts/100",
-            {"some_key": "some_value"},
-            None,
-            False,
-            False,
-            True,
-            True,
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/100",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
         )
-        request.assert_is_dict({"some_key":"some_value"}, "this one is a dict object")
+        request.assert_is_dict({"some_key": "some_value"}, "this one is a dict object")
         request.assert_is_text(b"", "this one is text object")
 
     # TODO: write assertion test for 3xx and 5xx status code
     @expectedFailure
     def test_assert_other_status(self):
         request = Assert(
-            "GET",
-            "https://jsonplaceholder.typicode.com/postsa/100",
-            {"some_key": "some_value"},
-            None,
-            False,
-            False,
-            True,
-            True,
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/postsa/100",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
         )
         request.assert_is_3xx_status("supposed to be fail, but not receive 3xx status")
         request.assert_is_5xx_status("supposed to be fail, but not receive 5xx status")
