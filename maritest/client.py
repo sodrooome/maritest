@@ -220,7 +220,7 @@ class Http:
             verify=self.suppress_warning,
             cert=self.cert,
         )
-        kwargs = {"allow_redirects": self.allow_redirects}
+        kwargs = {"allow_redirects": self.allow_redirects, "timeout": self.timeout}
         kwargs.update(update_request)
 
         try:
@@ -237,9 +237,7 @@ class Http:
                     s.mount("http://", adapter)
                 else:
                     self.logger.info("[INFO] HTTP retry method might be turned it off")
-                self.response = s.send(
-                    request=prepare_request, timeout=self.timeout, **kwargs
-                )
+                self.response = s.send(request=prepare_request, **kwargs)
         except requests.exceptions.Timeout as e:
             # temporary using requests exception
             # TODO: make base class for custom exceptio
