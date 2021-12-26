@@ -4,12 +4,11 @@ from maritest.assertion import Assert
 
 
 class TestHttpAssertion(unittest.TestCase):
-    @expectedFailure
     def test_assert_failed(self):
         # this test case supposed to be failed
         request = Assert(
             method="GET",
-            url="https://jsonplaceholder.typicode.com/posts",
+            url="https://jsonplaceholder.typicode.com/postas",
             headers={"some_key": "some_value"},
             proxies=None,
             logger=False,
@@ -112,6 +111,17 @@ class TestHttpAssertion(unittest.TestCase):
         request.assert_is_3xx_status("supposed to be fail, but not receive 3xx status")
         request.assert_is_5xx_status("supposed to be fail, but not receive 5xx status")
 
+    def test_assert_3xx_status(self):
+        request = Assert(
+            method="GET",
+            url="https://httpbin.org/status/301",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+            allow_redirects=False
+        )
+        request.assert_is_3xx_status("This one must be 3xx status")
+        request.allow_redirects == False
 
 if __name__ == "__main__":
     unittest.main()
