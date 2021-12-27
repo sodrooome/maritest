@@ -50,9 +50,9 @@ class TestHttpAssertion(unittest.TestCase):
             proxies=None,
             logger=False,
         )
-        request.assert_is_has_content("yeah it has content")
-        request.assert_is_has_json("yeah, it must be right?")
-        request.assert_is_has_text("yeah it perhaps has text")
+        request.assert_has_content("yeah it has content")
+        request.assert_has_json("yeah, it must be right?")
+        request.assert_has_text("yeah it perhaps has text")
         request.assert_is_headers("HTTP headers it a must!")
 
     def test_assert_other_assertion(self):
@@ -95,8 +95,10 @@ class TestHttpAssertion(unittest.TestCase):
             proxies=None,
             logger=False,
         )
-        request.assert_is_dict({"some_key": "some_value"}, "this one is a dict object")
-        request.assert_is_text(b"", "this one is text object")
+        request.assert_dict_to_equal(
+            {"some_key": "some_value"}, "this one is a dict object"
+        )
+        request.assert_text_to_equal(b"", "this one is text object")
 
     # TODO: write assertion test for 3xx and 5xx status code
     @expectedFailure
@@ -118,10 +120,31 @@ class TestHttpAssertion(unittest.TestCase):
             headers={"some_key": "some_value"},
             proxies=None,
             logger=False,
-            allow_redirects=False
+            allow_redirects=False,
         )
         request.assert_is_3xx_status("This one must be 3xx status")
         request.allow_redirects == False
+
+    def assert_response_time_less(self):
+        request = Assert(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/100",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+        )
+        request.assert_response_time_less("Shouldn't be exceed the limit")
+
+    def assert_expect_to_failed(self):
+        request = Assert(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/100",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+        )
+        request.assert_expected_to_fail("This one is not failed, but must be pass")
+
 
 if __name__ == "__main__":
     unittest.main()
