@@ -90,21 +90,21 @@ class Assert(Http):
         else:
             print(message)
 
-    def assert_is_has_content(self, message: str):
+    def assert_has_content(self, message: str):
         if self.response.content:
             print(message, f"The content was => {self.response.content}")
         else:
             message = "There's no content in the body"
             raise AssertionError(message)
 
-    def assert_is_has_json(self, message: str):
+    def assert_has_json(self, message: str):
         if self.response.json:
             print(message, f"The JSON body was => {self.response.json}")
         else:
             message = "The request has no JSON object"
             raise AssertionError(message)
 
-    def assert_is_has_text(self, message: str):
+    def assert_has_text(self, message: str):
         if self.response.text:
             print(message, f"The request has text => {self.response.text}")
         else:
@@ -159,18 +159,36 @@ class Assert(Http):
             message = "The duration exceeds the limit"
             raise AssertionError(message)
 
-    def assert_is_text(self, obj: str, message: str):
+    def assert_text_to_equal(self, obj: str, message: str):
         if self.response.text:
             return print(isinstance(obj, str)), message
         else:
             message = f"Str type doesn't match with {obj}"
             raise AssertionError(message)
 
-    def assert_is_dict(self, obj: dict, message: str):
+    def assert_dict_to_equal(self, obj: dict, message: str):
         if self.response.json:
             return print(isinstance(obj, dict)), message
         else:
             message = f"Dict type doesn't match with {obj}"
+            raise AssertionError(message)
+
+    def assert_response_time_less(self, message: str):
+        # this one actually inspired from postman
+        # collection test script about getting response
+        # whenever calling an API
+        max_duration = 200
+        if self.response.elapsed.total_seconds() <= max_duration:
+            return print(message)
+        else:
+            message = "The duration exceeds the limit"
+            raise AssertionError(message)
+
+    def assert_expected_to_fail(self, message: str):
+        if self.response.status_code in [200, 201]:
+            return print(message)
+        else:
+            message = "Expected to be failed, but got success instead"
             raise AssertionError(message)
 
     # TODO: write assertion for validating JSON body

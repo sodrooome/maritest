@@ -151,7 +151,7 @@ class Http:
             self.logger.info(f"[INFO] HTTP Request {self.method} | {self.url}")
             self.logger.debug(msg=message)
 
-        if self.headers is None:
+        if headers is None:
             # enforcing headers alwasy
             # wrap themselves with dict type
             self.headers = {}
@@ -353,15 +353,15 @@ class Http:
         raise NotImplementedError
 
     @abstractmethod
-    def assert_is_has_content(self, message: str):
+    def assert_has_content(self, message: str):
         raise NotImplementedError
 
     @abstractmethod
-    def assert_is_has_json(self, message: str):
+    def assert_has_json(self, message: str):
         raise NotImplementedError
 
     @abstractmethod
-    def assert_is_has_text(self, message: str):
+    def assert_has_text(self, message: str):
         raise NotImplementedError
 
     @abstractmethod
@@ -389,9 +389,17 @@ class Http:
         raise NotImplementedError
 
     @abstractmethod
-    def assert_is_text(self, obj: str, message: str):
+    def assert_text_to_equal(self, obj: str, message: str):
         raise NotImplementedError
 
     @abstractmethod
-    def assert_is_dict(self, obj: dict, message: str):
+    def assert_dict_to_equal(self, obj: dict, message: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    def assert_response_time_less(self, message: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    def assert_expected_to_fail(self, message: str):
         raise NotImplementedError
