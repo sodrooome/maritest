@@ -17,8 +17,9 @@ import logging
 import requests
 import warnings
 import urllib3
+from .version import __version__
 from abc import abstractmethod
-from requests.sessions import session
+from requests.sessions import CaseInsensitiveDict, session
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from contextlib import contextmanager
@@ -44,6 +45,17 @@ def response_hook(response: requests.Response, *args, **kwargs):
     return response.raise_for_status(), *args, kwargs
 
 
+# TODO: also split this function callable
+def default_headers():
+    return CaseInsensitiveDict(
+        {
+            "User-Agent": f"maritest, {__version__}",
+            "Accept": "*/*",
+            "Connection": "keep-alive",
+        }
+    )
+
+
 class Http:
     """
     This is a base class for HTTP client
@@ -58,7 +70,7 @@ class Http:
         logger: bool = True,
         event_hooks: bool = False,
         retry: bool = True,
-        supress_warning: bool = True,
+        supress_warning: bool = None,
         proxies: dict = None,
         **kwargs,
     ) -> None:
@@ -79,7 +91,7 @@ class Http:
         :param retry: Enable retry mechanism with default total
         attempts up-to 3, by default set to True
         :param suppress_warning: Verification of SSL certificate, if
-        set True, will suppressed warning message
+        set False, will suppressed warning message
         :param proxies: HTTP proxies configuration, by default
         always set to None, and must be configured in HTTPS
         :param kwargs: given by keyword argument
@@ -154,7 +166,8 @@ class Http:
         if headers is None:
             # enforcing headers alwasy
             # wrap themselves with dict type
-            self.headers = {}
+            # merge with pre-defined headers
+            self.headers = default_headers()
 
         if self.timeout is None:
             self.timeout = 120
@@ -187,14 +200,19 @@ class Http:
                 # TODO: differentiate the sessions attribute itself
                 self.proxies = requests.Session().proxies.update(proxies)
 
-        if supress_warning:
-            self.suppress_warning = True
-            self.logger.warning("[WARNING] SSL verification status is disabled")
-        else:
-            # move disable warnings in here
-            disable_warnings()
-            self.suppress_warning = False
-            self.logger.info("[INFO] SSL verification status is enabled")
+        if supress_warning is not None:
+            if supress_warning:
+                warnings.warn(
+                    "parameter `suppressed_warning` will be deprecated and no longer use in the next release "
+                    "consider to add certification path instead or always enable the SSL verification issue "
+                )
+                self.suppress_warning = True
+                self.logger.warning("[WARNING] SSL verification status is disabled")
+            else:
+                # move disable warnings in here
+                disable_warnings()
+                self.suppress_warning = False
+                self.logger.info("[INFO] SSL verification status is enabled")
 
         # wrap it our request
         # and prepare it first before
