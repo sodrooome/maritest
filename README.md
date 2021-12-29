@@ -27,7 +27,7 @@ class TestApiB(unittest.TestCase):
         ...
 ```
 
-And thus it becomes problematic when there are many test scenarios that need to be validated, especially from those scenarios what will definitely be written is to asserting headers, response body, status code or content-type. With **Maritest**, it will make it easier to write iterative assertions and make it easier to maintainable API tests module. From there, we can actually write it with much simpler function (or just plain variables) :
+And thus it becomes problematic when there are many test scenarios that need to be validated, especially from those scenarios what will definitely be written such as asserting headers, response body, status code or content-type. With **Maritest**, it will make it easier to write iterative assertions without the need for us to write the expectations and actual results from the API we tested and make it easier to maintainable API tests module. From there, we can actually write it with much simpler function (or just plain variables) :
 
 ```python
 class TestApiB:
@@ -49,7 +49,9 @@ The main concern is about since our assertion is only limited to the assertions 
 
 ### Installation
 
-**TBD**
+To install maritest just simply using :
+
+`pip install maritest`
 
 ### Basic Usage
 
@@ -84,10 +86,10 @@ from maritest.assertion import Assert
 request = Assert(..., event_hooks=True) # enable event hooks
 
 # using normal assertion will return like this
-> AssertionError: The status got 4xx
+>>> AssertionError: The status got 4xx
 
 # with event_hooks set to True become like this
-> requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://jsonplaceholder.typicode.com/postss
+>>> requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://jsonplaceholder.typicode.com/postss
 ```
 
 - Using retry instead timeout mechanism
@@ -99,7 +101,7 @@ request = Assert(..., retry=True) # enable this retry
 
 # there's indicator that we're using retry
 # if we also set the logger parameter to True
-> 19-12-2021 12:12:30 : Maritest Logger : __init__ : [INFO] HTTP retry method might be turned it off
+>>> 19-12-2021 12:12:30 : Maritest Logger : __init__ : [INFO] HTTP retry method might be turned it off
 ```
 
 - Enable logger stream handler
@@ -110,12 +112,12 @@ from maritest.assertion import Assert
 request = Assert(..., logger=True) # enable this logger
 
 # without logger
-> The status code was : 200
+>>> The status code was : 200
 
 # with logger enabled
-> 19-12-2021 12:12:30 : Maritest Logger : __init__ : [INFO] HTTP Request GET | https://jsonplaceholder.typicode.com/posts
-> 19-12-2021 12:12:30 : Maritest Logger : __init__ : [DEBUG] HTTP Request None, None
-> 19-12-2021 12:12:31 : Maritest Logger : __init__ : [INFO] HTTP Response 200
+>>> 19-12-2021 12:12:30 : Maritest Logger : __init__ : [INFO] HTTP Request GET | https://jsonplaceholder.typicode.com/posts
+>>> 19-12-2021 12:12:30 : Maritest Logger : __init__ : [DEBUG] HTTP Request None, None
+>>> 19-12-2021 12:12:31 : Maritest Logger : __init__ : [INFO] HTTP Response 200
 ```
 
 - Suppressed warning message about SSL. Particulary, this one is not advise to do it, its strongly advise to add certification path
@@ -171,3 +173,8 @@ request.assert_tls_secure()
 - [ ] Assertion for data type of object (could it be Array properties, dict, etc)
 - [ ] Several enhancements and improvements from missing property in HTTP client
 - [ ] Error message improvements in assertion test and parameter customization
+
+### Acknowledgements
+
+- [requests](https://docs.python-requests.org/en/latest/user/quickstart/), as base building to create and extending custom HTTP client.
+- [Postman scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/), as idea to make assertion scenario
