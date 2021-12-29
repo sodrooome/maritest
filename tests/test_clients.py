@@ -120,7 +120,7 @@ class TestHttpClient(unittest.TestCase):
         self.assertEqual("https://jsonplaceholder.typicode.com/posts", request.url)
         self.assertEqual("GET", request.method)
         self.assertEqual({"some_key": "some_value"}, request.headers)
-        self.assertTrue(request.suppress_warning)  # validate this param set to True
+        self.assertFalse(request.suppress_warning)  # validate this param set to True
         self.assertTrue(request.logger)
 
     def test_mock_http_method(self):
