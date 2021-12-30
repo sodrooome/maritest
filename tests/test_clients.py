@@ -40,10 +40,11 @@ class TestHttpClient(unittest.TestCase):
             proxies={"https": "https://google.com"},
             json=request_body,
             logger=False,
+            timeout=True
         )
         self.assertEqual("POST", request.method)
         self.assertEqual(201, request.response.status_code)
-        self.assertEqual(None, request.proxies)
+        self.assertEqual(None, request.proxy)
 
     def test_put_method(self):
         request_body = {
