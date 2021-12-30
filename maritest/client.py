@@ -13,13 +13,17 @@ limitations under the License.
 
 Initial code: Ryan Febriansyah, 03-12-2021
 """
+try:
+    import requests
+except ImportError as e:
+    raise Exception(f"Unable to importerd `requests` package {e}")
+
 import logging
-import requests
 import warnings
 import urllib3
 from .version import __version__
 from abc import abstractmethod
-from requests.sessions import CaseInsensitiveDict, session
+from requests.sessions import CaseInsensitiveDict
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from contextlib import contextmanager
@@ -71,7 +75,7 @@ class Http:
         event_hooks: bool = False,
         retry: bool = True,
         supress_warning: bool = None,
-        proxies: dict = None,
+        proxy: dict = None,
         **kwargs,
     ) -> None:
         """
@@ -92,7 +96,7 @@ class Http:
         attempts up-to 3, by default set to True
         :param suppress_warning: Verification of SSL certificate, if
         set False, will suppressed warning message
-        :param proxies: HTTP proxies configuration, by default
+        :param proxy: HTTP proxies configuration, by default
         always set to None, and must be configured in HTTPS
         :param kwargs: given by keyword argument
 
@@ -138,7 +142,7 @@ class Http:
         self.data = None
         self.params = None
         self.files = None
-        self.proxies = proxies
+        self.proxy = proxy
         self.allow_redirects = allow_redirects
         self.stream = False
         self.cert = None
@@ -146,16 +150,12 @@ class Http:
             supress_warning  # by default set to True due staging environment
         )
         self.verify = None
+        self.session = None
 
         # re-write this message
         # the output still returned as
         # interpolation format
         message = f"[DEBUG] HTTP Request {self.headers}, {self.timeout}"
-
-        if requests is None:
-            raise NotImplementedError(
-                "Something error, perhaps requests package not installed?"
-            )
 
         if logger:
             # why the heck am i validate
@@ -187,10 +187,14 @@ class Http:
         if self.params is None:
             self.params = {}
 
+        # new attribute to call the request session instance
+        if self.session is None:
+            self.session = requests.Session()
+
         # by default, using proxies only
         # for HTTPS over HTTP connection
-        if proxies is not None:
-            if "https" not in [key for key in self.proxies.keys()]:
+        if proxy is not None:
+            if "https" not in [key for key in self.proxy.keys()]:
                 raise ConnectionError(
                     "Proxy connection must be configured HTTPS over HTTP"
                 )
@@ -198,7 +202,7 @@ class Http:
                 # elsewhere, update the new conf
                 # for proxy before merge into request
                 # TODO: differentiate the sessions attribute itself
-                self.proxies = requests.Session().proxies.update(proxies)
+                self.proxy = self.session.proxies.update(proxy)
 
         if supress_warning is not None:
             if supress_warning:
@@ -231,9 +235,9 @@ class Http:
         # before final request, check
         # whether environment has proxies protocol or not
         # if yes, then merged it as one
-        update_request = requests.Session().merge_environment_settings(
+        update_request = self.session.merge_environment_settings(
             url=self.url,
-            proxies=self.proxies,
+            proxies=self.proxy,
             stream=self.stream,
             verify=self.suppress_warning,
             cert=self.cert,
@@ -242,7 +246,7 @@ class Http:
         kwargs.update(update_request)
 
         try:
-            with requests.Session() as s:
+            with self.session as s:
                 if retry:
                     self.retry = Retry(
                         total=3,
@@ -251,8 +255,14 @@ class Http:
                         backoff_factor=0.3,
                     )
                     adapter = HTTPAdapter(max_retries=self.retry)
-                    s.mount("https://", adapter)
-                    s.mount("http://", adapter)
+                    if self.url.startswith("https"):
+                        s.mount("https://", adapter)
+                    else:
+                        # only given a log warning for user
+                        s.mount("http", adapter)
+                        self.logger.warning(
+                            f"[WARNING] you're going to mounted unverified (HTTP) protocol"
+                        )
                 else:
                     self.logger.info("[INFO] HTTP retry method might be turned it off")
                 self.response = s.send(request=prepare_request, **kwargs)
