@@ -21,6 +21,7 @@ except ImportError as e:
 import logging
 import warnings
 import urllib3
+import urllib.parse
 from .version import __version__
 from abc import abstractmethod
 from requests.sessions import CaseInsensitiveDict
@@ -255,11 +256,11 @@ class Http:
                         backoff_factor=0.3,
                     )
                     adapter = HTTPAdapter(max_retries=self.retry)
-                    if self.url.startswith("https"):
+                    if urllib.parse.urlparse(self.url).scheme == "https://":
                         s.mount("https://", adapter)
                     else:
                         # only given a log warning for user
-                        s.mount("http", adapter)
+                        s.mount("http://", adapter)
                         self.logger.warning(
                             f"[WARNING] you're going to mounted unverified (HTTP) protocol"
                         )
