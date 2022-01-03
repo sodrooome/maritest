@@ -125,6 +125,18 @@ class TestHttpAssertion(unittest.TestCase):
         request.assert_is_3xx_status("This one must be 3xx status")
         request.allow_redirects == False
 
+    def test_assert_5xx_status(self):
+        request = Assert(
+            method="GET",
+            url="https://httpstat.us/500",
+            headers={"some_key": "some_value"},
+            proxies="https://httpstat.us/200",
+            logger=False,
+            allow_redirects=True
+        )
+        request.assert_is_5xx_status("This one must be 5xx status")
+        request.allow_redirects == True
+
     def assert_response_time_less(self):
         request = Assert(
             method="GET",
