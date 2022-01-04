@@ -1,6 +1,6 @@
 ## Maritest
 
-[![Build](https://github.com/sodrooome/maritest/actions/workflows/test.yml/badge.svg)](https://github.com/sodrooome/maritest/actions/workflows/test.yml)
+[![Build](https://github.com/sodrooome/maritest/actions/workflows/test.yml/badge.svg)](https://github.com/sodrooome/maritest/actions/workflows/test.yml) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/maritest)
 
 Maritest is an API testing framework that is used internally in the MauKerja tester team which aims to make it easier for QA to make assertions when doing the testing in API layer. The writing design for test script itself is highly influence by Postman test script scenario (you can refer to this [one](https://learning.postman.com/docs/writing-scripts/script-references/test-examples/#testing-response-body))
 
@@ -45,7 +45,9 @@ class TestApiB:
 
 ### Limitation
 
-The main concern is about since our assertion is only limited to the assertions that we have defined previously, so it is very difficult to create and leveraging other assertion scenario that we wanted. Other than that, another problem is when you want to do custom validation in a complex response body or want to validate the data type of an object
+The main concern is about since our assertion is only limited to the assertions that we have defined previously, so it is very difficult to create and leveraging other assertion scenario that we wanted. Other than that, another problem is when you want to do custom validation in a complex response body or want to validate the data type of an object.
+
+Other limitation is Maritest only support 5 HTTP methods (`GET`, `POST`, `PATCH`, `DELETE`, `PUT`) other HTTP methods are not supported yet
 
 ### Installation
 
@@ -70,7 +72,74 @@ that we've already set before. If not success, then t will print a formatted err
 (without you needing to customize it again).
 
 For now, Maritest already have prepared several kinds of assertions which include a common assertion that is always used
-in testing scenario
+in testing for API scenario, those are :
+
+```python
+request = Assert("GET", "https://api.foo.bar", headers=...)
+
+# assert if request was success
+# and you can also write custom message if success
+request.assert_is_ok(message=...)
+
+# assert if request was failed
+request.assert_is_failed()
+
+# assert if response has headers
+request.assert_is_headers()
+
+# assert if content-type in headers is set
+request.assert_is_content_type()
+
+# assert to identifying content-type value was equal to
+request.assert_content_type_to_equal(value=..., message=...)
+
+# assert if response status code is 2xx
+request.assert_is_2xx_status()
+
+# assert if response status code NOT in range 3xx
+request.assert_is_3xx_status()
+
+# assert if response status code NOT in range 4xx
+request.assert_is_4xx_status()
+
+# assert if response status code NOT in range 5xx
+request.assert_is_5xx_status()
+
+# assert if response body has multipart files
+request.assert_has_content()
+
+# assert if response body has json object
+request.assert_has_json()
+
+# assert if response body has text attribute, binary
+request.assert_has_text()
+
+# assert to identifying status code was in expected result
+request.assert_status_code_in(status_code=204)
+
+# assert to identifying status code NOT in expected result
+request.assert_status_code_not_in(status_code=401)
+
+# assert if json response body equal to expected result
+request.assert_json_to_equal(obj={"this one json object"})
+
+# assert if multipart response equal to expected result
+request.assert_content_to_equal(obj=...)
+
+# assert if text response body equal to expected result
+request.assert_text_to_equal(obj=b'this one is bytes object')
+
+# assert to identifying whether response time API calls in max duration
+request.assert_response_time(duration=200)
+
+# assert to check if response time API calss NOT exceeds the max durationn
+request.assert_response_time_less(message='should not exceed the limit')
+
+# assert that request expected to be failed in 200 or 201 status code
+request.assert_expected_to_fail()
+```
+
+**Extra notes** : first parameter `message` is required to be fullfiled, if its not then only returned as `None` values
 
 ### Extending Usage
 
