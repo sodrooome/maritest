@@ -199,6 +199,29 @@ from maritest.assertion import Assert
 request = Assert(..., suppress_warning=True) 
 ```
 
+- Allow location redirection for HTTP target, supported for all HTTP methods. for example :
+
+```python
+from maritest.client import Http
+
+# set to `True` for allow_redirection argument
+request = Http(method="GET", url="http://github.com", allow_redirects=True) 
+```
+
+**Extra notes** : You can actually see several times or history the URL that you input does redirection using the retriever method that has been provided with this framework. To do this you can perform with :
+
+```python
+# import Response module from maritest
+from maritest.response import Response
+
+request = Response(...)
+request.history_response()
+
+# the output will be like this
+>>> URL redirects : http://github.com/
+>>> Count history : 1 [None]
+```
+
 - Integrate with other Python test framework, for example would be integrate with Pytest. After write this example, just run it with `pytest` command
 
 ```python
