@@ -132,7 +132,7 @@ class TestHttpAssertion(unittest.TestCase):
             headers={"some_key": "some_value"},
             proxies="https://httpstat.us/200",
             logger=False,
-            allow_redirects=True
+            allow_redirects=True,
         )
         request.assert_is_5xx_status("This one must be 5xx status")
         request.allow_redirects == True
