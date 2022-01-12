@@ -13,6 +13,7 @@ limitations under the License.
 
 Initial code: Ryan Febriansyah, 20-12-2021
 """
+import json
 from .client import Http
 
 
@@ -132,7 +133,10 @@ class Assert(Http):
             raise AssertionError(message)
 
     def assert_json_to_equal(self, obj, message: str):
-        if self.response.json() == obj:
+        response_data = self.response.json()
+        dumps = json.dumps(response_data, sort_keys=False)
+        loads = json.loads(dumps)
+        if loads == obj:
             return print(message)
         else:
             message = "There's no object that match"
