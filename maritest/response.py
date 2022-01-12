@@ -1,8 +1,7 @@
 from abc import ABC
 from json.decoder import JSONDecodeError
 
-import textwrap
-from client import Http
+from .client import Http
 
 
 class Response(Http, ABC):
