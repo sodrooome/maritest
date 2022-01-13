@@ -259,6 +259,25 @@ request = CustomAssertion("GET", "do something about it", {"headers":"headers_va
 request.assert_tls_secure()
 ```
 
+- Printed HTTP response with format that given : `json`, `multipart` and `text`
+
+```python
+from maritest.response import Response
+
+resp = Response("https://github.com", None, False)
+
+# printed HTTP response as JSON object
+# within call this `retriever()` method and
+# change the parameter format with `json`
+resp.retriever(format="json")
+
+# or, printed as multipart object
+resp.retriever(format="multipart")
+
+# or, printed as binary / text object
+resp.retriever(format="text")
+```
+
 ### Features
 
 - [x] Allow redirects, handling connection timeout and backoff mechanism
