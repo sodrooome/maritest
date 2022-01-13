@@ -256,7 +256,7 @@ class Http:
                         backoff_factor=0.3,
                     )
                     adapter = HTTPAdapter(max_retries=self.retry)
-                    if urllib.parse.urlparse(self.url).scheme == "https":
+                    if urllib.parse.urlparse(self.url).scheme == "http":
                         s.mount("https://", adapter)
                     else:
                         # only given a log warning for user
