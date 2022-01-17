@@ -85,7 +85,8 @@ class Response(Http, ABC):
                 ]
             else:
                 response_count = 0
-                response_body = "Either there's no URL redirect that can be counted or don't enable the parameter `allow_redirects` settings"
+                response_body = "Either there's no URL redirect that can be counted or don't enable the parameter " \
+                                "`allow_redirects` settings "
         except Exception as e:
             raise Exception(f"Another exception was occurs {e}")
 
