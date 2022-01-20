@@ -1,5 +1,6 @@
 from abc import ABC
 from json.decoder import JSONDecodeError
+import textwrap
 
 from .client import Http
 
@@ -90,3 +91,32 @@ class Response(Http, ABC):
             raise Exception(f"Another exception was occurs {e}")
 
         print(f"Count history : {response_count}", response_body)
+
+    def http_response(self, *args, **kwargs):
+        """
+        Formatted HTTP response as raw format (text)
+        """
+        formatted_response = lambda x: "\n".join(
+            f"{key} : {value}" for key, value in x.items()
+        )
+        print(
+            textwrap.dedent(
+                """
+            ------------------Maritest Request------------------
+            {req.method} {req.url}
+            {request_headers}
+
+            {req.body}
+            ------------------Maritest Response-----------------
+            {resp.status_code} {resp.url}
+            {response_headers}
+
+            {resp.text}
+            """
+            ).format(
+                req=self.response.request,
+                resp=self.response,
+                request_headers=formatted_response(self.response.request.headers),
+                response_headers=formatted_response(self.response.headers),
+            )
+        )

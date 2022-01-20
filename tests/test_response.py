@@ -17,6 +17,7 @@ class TestHttpResponse(unittest.TestCase):
 
         # no redirection, just checking the other output
         response.history_response()
+        response.http_response()
 
     def test_http_history_redirects(self):
         response = Response(
