@@ -1,6 +1,13 @@
 import unittest
 from unittest.case import expectedFailure
 from maritest.client import Http
+from maritest.custom_auth import (
+    BasicAuth,
+    DigestAuth,
+    BasicAuthToken,
+    ApiKeyAuth,
+    BearerAuth,
+)
 
 
 class MockMethod(Http):
@@ -150,6 +157,56 @@ class TestHttpClient(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             request.assert_is_failed("failed")
             request.assert_is_ok("supposed to be ok, but failed")
+
+    def test_http_basic_auth(self):
+        request = Http(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts",
+            headers={"some_key": "some_value"},
+            logger=False,
+            auth=BasicAuth("this is some username", "this is some password"),
+        )
+        assert request.response.status_code == 200
+
+    def test_http_digest_auth(self):
+        request = Http(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts",
+            headers={"some_key": "some_value"},
+            logger=False,
+            auth=DigestAuth("some username", "some password"),
+        )
+        assert request.response.status_code == 200
+
+    def test_http_token_auth(self):
+        request = Http(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts",
+            headers={"some_key": "some_value"},
+            logger=False,
+            auth=BasicAuthToken(token="some key of token"),
+        )
+        assert request.response.status_code == 200
+
+    def test_http_bearer_auth(self):
+        request = Http(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts",
+            headers={"some_key": "some_value"},
+            logger=False,
+            auth=BearerAuth(token="some bearer token"),
+        )
+        assert request.response.status_code == 200
+
+    def test_http_api_auth(self):
+        request = Http(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts",
+            headers={"some_key": "some_value"},
+            logger=False,
+            auth=ApiKeyAuth(key="some key", value="some value", add_to="headers"),
+        )
+        assert request.response.status_code == 200
 
 
 if __name__ == "__main__":
