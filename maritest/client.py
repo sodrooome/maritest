@@ -100,6 +100,8 @@ class Http:
         :param proxy: HTTP proxies configuration, by default
         always set to None, and must be configured in HTTPS
         :param kwargs: given by keyword argument
+        :param auth: Authentication configuration for using
+        HTTP client, by default set to None
 
         Returned as HTTP response
         """
@@ -152,6 +154,7 @@ class Http:
         )
         self.verify = None
         self.session = None
+        self.auth = None
 
         # re-write this message
         # the output still returned as
@@ -176,7 +179,7 @@ class Http:
         if method is not None:
             self.method = method.upper()
 
-        if self.method not in [index for index in ALLOWED_METHODS]:
+        if self.method not in iter(ALLOWED_METHODS):
             raise NotImplementedError(f"Currently {self.method} method not supported")
 
         if self.response is None:
@@ -230,6 +233,7 @@ class Http:
             data=self.data,
             json=self.json,
             files=self.files,
+            auth=self.auth,
         )
         prepare_request = request.prepare()
 
