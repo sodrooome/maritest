@@ -86,7 +86,10 @@ class Response(Http, ABC):
                 ]
             else:
                 response_count = 0
-                response_body = "Either there's no URL redirect that can be counted or don't enable the parameter `allow_redirects` settings"
+                response_body = (
+                    "Either there's no URL redirect that can be counted or don't enable the parameter "
+                    "`allow_redirects` settings "
+                )
         except Exception as e:
             raise Exception(f"Another exception was occurs {e}")
 
@@ -96,8 +99,11 @@ class Response(Http, ABC):
         """
         Formatted HTTP response as raw format (text)
         """
-        formatted_response = lambda x: "\n".join(
-            f"{key} : {value}" for key, value in x.items()
+        format_request = "\n".join(
+            f"{key} : {value}" for key, value in self.response.request.headers.items()
+        )
+        format_headers = "\n".join(
+            f"{key} : {value}" for key, value in self.response.headers.items()
         )
         print(
             textwrap.dedent(
@@ -116,7 +122,7 @@ class Response(Http, ABC):
             ).format(
                 req=self.response.request,
                 resp=self.response,
-                request_headers=formatted_response(self.response.request.headers),
-                response_headers=formatted_response(self.response.headers),
+                request_headers=format_request,
+                response_headers=format_headers,
             )
         )
