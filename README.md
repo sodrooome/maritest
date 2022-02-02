@@ -155,7 +155,10 @@ from maritest.assertion import Assert
 request = Assert(..., event_hooks=True) # enable event hooks
 
 # using normal assertion will return like this
->>> AssertionError: The status got 4xx
+>>> maritest.exceptions.Matcher:
+>>>  Actual status code was   => 404
+>>>  Expected status code was => 200, 201
+>>>  And the message is       => Sukses
 
 # with event_hooks set to True become like this
 >>> requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://jsonplaceholder.typicode.com/postss
@@ -278,12 +281,40 @@ resp.retriever(format="multipart")
 resp.retriever(format="text")
 ```
 
+- Using extended custom authentication when requested API calls. For this one, Maritest already provided built-in APIs that can be use for HTTP authentication. The usage is straightforwad and simple like that `requests` package used for, such as :
+
+```python
+from maritest.assertion import Assert
+from maritest.custom_auth import * # will imported all custom auth method
+
+# calls the auth argument
+# and pass the built-in APIs for
+# HTTP authentication, eg:
+# using `BasicAuth()`
+resp = Assert(method=..., url=..., headers=..., auth=BasicAuth(username="some username", password="some password"))
+
+# using `DigestAuth()`
+resp = Assert(method=..., url=..., headers=..., auth=DigestAuth(username="some username", password="some password"))
+
+# using `BearerAuthToken()`
+resp = Assert(method="GET", url=..., headers=..., auth=BearerAuth(token="bearer token"))
+
+# using `BasicAuthToken()`
+resp =  Assert(method="GET", url=..., headers=..., auth=BasicAuthToken(token="basic token"))
+
+# using `APIKeyAuth()`
+# parameter `add_to` is required
+# to fullfilled, the choice
+# between `headers` or `query_params`
+resp = Assert(method="GET", url=..., headers=..., auth=ApiKeyAuth(key="some key", value="some value", add_to="headers"))
+```
+
 ### Features
 
 - [x] Allow redirects, handling connection timeout and backoff mechanism
 - [ ] Assertion for data type of object (could it be Array properties, dict, etc)
-- [ ] Several enhancements and improvements from missing property in HTTP client
-- [ ] Error message improvements in assertion test and parameter customization
+- [x] Several enhancements and improvements from missing property in HTTP client
+- [x] Error message improvements in assertion test and parameter customization
 
 ### Acknowledgements
 
