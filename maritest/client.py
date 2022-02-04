@@ -271,6 +271,7 @@ class Http:
                 else:
                     self.logger.info("[INFO] HTTP retry method might be turned it off")
                 self.response = s.send(request=prepare_request, **kwargs)
+                self.response.encoding = "utf-8"
         except requests.exceptions.Timeout as e:
             # temporary using requests exception
             # TODO: make base class for custom exceptio
@@ -419,10 +420,6 @@ class Http:
 
     @abstractmethod
     def assert_response_time(self, duration: int, message: str):
-        raise NotImplementedError
-
-    @abstractmethod
-    def assert_text_to_equal(self, obj: str, message: str):
         raise NotImplementedError
 
     @abstractmethod
