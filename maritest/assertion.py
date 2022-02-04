@@ -142,13 +142,6 @@ class Assert(Http):
             message = "There's no object that match"
             raise AssertionError(message)
 
-    def assert_text_to_equal(self, obj, message: str):
-        if self.response.text == obj:
-            return print(message)
-        else:
-            message = "There's no (text) object that match"
-            raise AssertionError(message)
-
     def assert_content_to_equal(self, obj, message: str):
         if self.response.content == obj:
             return print(message)
