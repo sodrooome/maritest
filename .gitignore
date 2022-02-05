@@ -1,3 +1,7 @@
 __pycache__/
 .idea/
 htmlcov/
+.vscode/
+build/
+dist/
+maritest.egg-info/
