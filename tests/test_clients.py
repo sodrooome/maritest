@@ -208,6 +208,29 @@ class TestHttpClient(unittest.TestCase):
         )
         assert request.response.status_code == 200
 
+    def test_send_data(self):
+        # hacky way: possibility found a bug (raise 400 status)
+        # when send request files with headers inside
+        # right now only set headers without key-value
+        request = Http(
+            method="POST",
+            url="https://httpbin.org/post",
+            headers={},
+            data={"some key": "some value"},
+            timeout=True,
+        )
+        self.assertEqual(200, request.response.status_code)
+
+    def test_files_data(self):
+        request = Http(
+            method="POST",
+            url="https://httpbin.org/post",
+            headers={},
+            files={"file": ("report.csv", "some,data,to,send\nanother,row,to,send\n")},
+            timeout=True,
+        )
+        self.assertEqual(200, request.response.status_code)
+
 
 if __name__ == "__main__":
     unittest.main()
