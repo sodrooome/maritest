@@ -21,6 +21,7 @@ except ImportError as e:
 import logging
 import warnings
 import urllib3
+import json
 import urllib.parse
 from .version import __version__
 from abc import abstractmethod
@@ -156,16 +157,11 @@ class Http:
         self.session = None
         self.auth = None
 
-        # re-write this message
-        # the output still returned as
-        # interpolation format
-        message = f"[DEBUG] HTTP Request {self.headers}, {self.timeout}"
-
         if logger:
             # why the heck am i validate
             # the logger twice ??
-            self.logger.info(f"[INFO] HTTP Request {self.method} | {self.url}")
-            self.logger.debug(msg=message)
+            self.logger.info(f"[INFO] HTTP Request {self.method} => {self.url}")
+            self.logger.debug(f"[DEBUG] HTTP Request {self.headers} => {self.url}")
 
         if headers is None:
             # enforcing headers alwasy
@@ -190,6 +186,15 @@ class Http:
 
         if self.params is None:
             self.params = {}
+
+        if self.files is None:
+            self.files = {}
+
+        if self.json is None:
+            self.json = {}
+        else:
+            # printed JSON response with formatted output
+            self.json = json.dumps(self.json, indent=2, sort_keys=False)
 
         # new attribute to call the request session instance
         if self.session is None:
@@ -285,7 +290,6 @@ class Http:
 
         self.logger.info(f"[INFO] HTTP Response {self.response.status_code}")
         self.logger.debug(f"[DEBUG] HTTP Response Header {self.response.headers}")
-        # self.logger.debug(f"[DEBUG] HTTP Response Content {self.response.content}")
 
         if event_hooks:
             # if event hooks was set to True
