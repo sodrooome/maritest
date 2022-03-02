@@ -1,47 +1,14 @@
 ## Maritest
 
-[![Build](https://github.com/sodrooome/maritest/actions/workflows/test.yml/badge.svg)](https://github.com/sodrooome/maritest/actions/workflows/test.yml) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/maritest)
+[![Build](https://github.com/sodrooome/maritest/actions/workflows/test.yml/badge.svg)](https://github.com/sodrooome/maritest/actions/workflows/test.yml) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/maritest) ![PyPI - Status](https://img.shields.io/pypi/status/maritest)
 
-Maritest is an API testing framework that is used internally in the MauKerja tester team which aims to make it easier for QA to make assertions when doing the testing in API layer. The writing design for test script itself is highly influence by Postman test script scenario (you can refer to this [one](https://learning.postman.com/docs/writing-scripts/script-references/test-examples/#testing-response-body))
+**Maritest** is an API testing framework that the purpose’s solely to simplifying assertion when doing testing in API layer, it’s an easy and convenient way to go iterative testing while keep up the fast-paced development and be able to maintain all testing modules / scenarios without breaking change
 
 ### Rationale
 
-As the development process began to iterate quickly, our QA teams needs to step up again when writing automation tests especially during assertions or API validation while in integration testing. Think of it, before using this framework, usually (and most of it) for writing own API testing will be like this :
+As the development process began to iterate quickly, our QA teams needs to step up again when writing automation tests especially during assertions or schema validation while doing API testing
 
-```python
-class TestApiB(unittest.TestCase):
-    def setUp(self):
-        # some code goes here
-
-    def test_services_a(self):
-        request = requests.get("foobar")
-        response = request.json()
-
-        # write all of assertion that we need
-        # with custom message for indicates that
-        # testing is pass or not
-        self.assertEqual(response, expected_result), "this one is in the bag!"
-        self.assertIn(request.status_code, [201, 204, 203]), "its success bro"
-        self.assertAlmostEquals(response["data"], [index for index in response]), "success bro"
-        self.assertIn(request.headers["content-type"], "WAHOO"), "sukses!"
-        ...
-```
-
-And thus it becomes problematic when there are many test scenarios that need to be validated, especially from those scenarios what will definitely be written such as asserting headers, response body, status code or content-type. With **Maritest**, it will make it easier to write iterative assertions without the need for us to write the expectations and actual results from the API we tested and make it easier to maintainable API tests module. From there, we can actually write it with much simpler function (or just plain variables) :
-
-```python
-class TestApiB:
-    def test_services_a(self):
-        request = Assert("GET", "base_url", headers)
-
-        # directly instantiate the assertion
-        # with existing error message or custom message
-        request.assert_is_failed
-        request.assert_is_ok("sukses!")
-        request.assert_is_2xx_status
-        request.assert_status_code_in([200,201,204])
-        request.assert_is_has_json
-```
+And thus it becomes problematic when there are many test scenarios that need to be validated, especially from those scenarios that most likely will definitely be written such as assertion for headers, response body, status code or content-type. With **Maritest**, it will make it easier to write iterative assertions without the need for us to write again for the expectations and actual results from the API we tested and make it easier to maintainable API tests module. From there, we can actually write it with much simpler automation API testing.
 
 ### Limitation
 
@@ -57,21 +24,31 @@ To install maritest just simply using :
 
 ### Basic Usage
 
-Basic usage for using **Maritest** its just declare like using normal variable without create new class for that 
+After you’re done with installation, you can try to use this basic feature from **Maritest** for example 
 
 ```python
 from maritest.assertion import Assert
 
-request = Assert("GET", "http://localhost", {"key":"value"})
-request.assert_is_2xx_status(message="sukses")
-request.assert_is_dict(message="sukses")
+request = Assert(
+    method="GET",                   # required, support 5 common HTTP method
+    url="https://api.services.com", # required
+    headers={},                     # required, set as empty dict if not needed
+    proxy={"http": "api.services"}, # not required, default set to None
+    timeout=60,                     # not required, default set to 120 seconds
+)
+
+# choose several method what kind of assertion that you wanted
+# 1. Assert that request is success
+# 2. Assert that request is failed
+request.assert_is_ok(message="Should be success")
+request.assert_is_failed(message="Should be failed")
 ```
 
 If assertion for that request is success and according to what we expected, then it will returned with custom message
-that we've already set before. If not success, then t will print a formatted error message that is already available 
+that we've already set before. If not success, then it will print a formatted error message that is already available 
 (without you needing to customize it again).
 
-For now, Maritest already have prepared several kinds of assertions which include a common assertion that is always used
+For now, Maritest already have prepared several kinds of assertions method which include a common assertion that is always used
 in testing for API scenario, those are :
 
 ```python
@@ -115,10 +92,10 @@ request.assert_has_json()
 request.assert_has_text()
 
 # assert to identifying status code was in expected result
-request.assert_status_code_in(status_code=204)
+request.assert_status_code_in(status_code=[200, 201])
 
 # assert to identifying status code NOT in expected result
-request.assert_status_code_not_in(status_code=401)
+request.assert_status_code_not_in(status_code=[400, 404])
 
 # assert if json response body equal to expected result
 request.assert_json_to_equal(obj={"this one json object"})
@@ -145,14 +122,14 @@ request.assert_expected_to_fail()
 
 for extending usage of this framework itself, it's actually similar to the built-in APIs already in the requests package 
 (Maritest built on top of [that](https://docs.python-requests.org/en/latest/user/quickstart/)), so the behavior for 
-advanced use cases will depend on that. For example
+advanced use cases will depend on that. For example in **Maritest** you can use some additional arguments based on existing `kwargs`
 
 - Leveraging request hooks
 
 ```python
 from maritest.assertion import Assert
 
-request = Assert(..., event_hooks=True) # enable event hooks
+request = Assert(..., event_hooks=True)
 
 # using normal assertion will return like this
 >>> maritest.exceptions.Matcher:
@@ -169,9 +146,9 @@ request = Assert(..., event_hooks=True) # enable event hooks
 ```python
 from maritest.assertion import Assert
 
-request = Assert(..., retry=True) # enable this retry
+request = Assert(..., retry=True)
 
-# there's indicator that we're using retry
+# there's indicator that we're using retry on
 # if we also set the logger parameter to True
 >>> 19-12-2021 12:12:30 : Maritest Logger : __init__ : [INFO] HTTP retry method might be turned it off
 ```
@@ -181,7 +158,7 @@ request = Assert(..., retry=True) # enable this retry
 ```python
 from maritest.assertion import Assert
 
-request = Assert(..., logger=True) # enable this logger
+request = Assert(..., logger=True)
 
 # without logger
 >>> The status code was : 200
@@ -234,10 +211,10 @@ class TestA:
         # API testing is against (or validate) for :
         # status code, headers, response time, body, etc
         request = Http("GET", "https://jsonplaceholder.typicode.com/posts", None)
-        request.assert_is_2xx_status(message="sukses")
-        request.assert_is_content_type(message="sukses")
-        request.assert_is_headers(message="sukses") 
-        request.assert_response_time(duration=200, message="sukses") # check response time for calling API
+        request.assert_is_2xx_status(message="success")
+        request.assert_is_content_type(message="success")
+        request.assert_is_headers(message="success") 
+        request.assert_response_time(duration=200, message="success")
 ```
 
 - Create customization assertion for your own. For this one, you can achieve it with inherited `Http` base class and afterwads. For example :
@@ -248,8 +225,6 @@ from maritest.http import Http
 
 class CustomAssertion(Http):
     def assert_tls_secure(self):
-        # this method validate whether
-        # the protocol is valid or not
         if self.url.startswith("http://"):
             raise AssertionError("do your own message")
         elif self.url.startswith("https://"):
@@ -270,7 +245,7 @@ from maritest.response import Response
 resp = Response("https://github.com", None, False)
 
 # printed HTTP response as JSON object
-# within call this `retriever()` method and
+# with call this `retriever()` method and
 # change the parameter format with `json`
 resp.retriever(format="json")
 
@@ -285,7 +260,7 @@ resp.retriever(format="text")
 
 ```python
 from maritest.assertion import Assert
-from maritest.custom_auth import * # will imported all custom auth method
+from maritest.custom_auth import BasicAuth, DigestAuth, BearerAuth, BasicAuthToken
 
 # calls the auth argument
 # and pass the built-in APIs for
