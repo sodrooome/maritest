@@ -188,4 +188,29 @@ class Assert(Http):
             message = "Expected to be failed, but got success instead"
             raise AssertionError(message)
 
+    def assert_content_length(self, message: str = None):
+        if message is None:
+            if self.response.headers["Content-Length"]:
+                message = "Request have content-length"
+                return print(message)
+            else:
+                message = "Request doesn't have content-length"
+                raise AssertionError(message)
+        else:
+            return print(message)
+
+    def assert_tls_secure(self, message: str = None):
+        if message is None:
+            if self.url.startswith("https://"):
+                message = "Your connection to the request was secure"
+                return print(message)
+            elif self.url.startswith("http://"):
+                message = "Your connection to the request wasn't secure"
+                return print(message)
+            else:
+                message = "Your connection scheme wasn't valid"
+                raise AssertionError(message)
+        else:
+            return print(message)
+
     # TODO: write assertion for validating JSON body
