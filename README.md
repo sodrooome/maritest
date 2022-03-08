@@ -114,6 +114,12 @@ request.assert_response_time_less(message='should not exceed the limit')
 
 # assert that request expected to be failed in 200 or 201 status code
 request.assert_expected_to_fail()
+
+# assert if TLS is secure or not, message argument is optional
+request.assert_tls_secure()
+
+# assert if response contains content-length, message argument is optional
+request.assert_content_length()
 ```
 
 **Extra notes** : first parameter `message` is required to be fullfiled, if its not then only returned as `None` values
@@ -153,7 +159,8 @@ request = Assert(..., retry=True)
 >>> 19-12-2021 12:12:30 : Maritest Logger : __init__ : [INFO] HTTP retry method might be turned it off
 ```
 
-- Enable logger stream handler
+- Enable logger stream handler. If `logger` argument is enabled, you will receive the output like this example but if you tend
+to disabled the `logger` argument, you will get the log file in your local (the file named is "maritest.log")
 
 ```python
 from maritest.assertion import Assert
