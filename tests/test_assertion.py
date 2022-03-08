@@ -157,6 +157,40 @@ class TestHttpAssertion(unittest.TestCase):
         )
         request.assert_expected_to_fail("This one is not failed, but must be pass")
 
+    def assert_tls_secure(self):
+        request = Assert(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/1",
+            headers={"some_key": "some_value"},
+        )
+        request.assert_tls_secure() # check without input success message argument
+        request.assert_tls_secure(message="Success")
+
+    def assert_tls_insecure(self):
+        request = Assert(
+            method="GET",
+            url="http://jsonplaceholder.typicode.com/posts/1",
+            headers={"some_key": "some_value"},
+        )
+        request.assert_tls_secure()
+
+    def assert_tls_not_valid(self):
+        request = Assert(
+            method="GET",
+            url="httpa://jsonplaceholder.typicode.com/posts/1",
+            headers={"some_key": "some_value"},
+        )
+        request.assert_tls_secure()
+
+    def assert_content_length(self):
+        request = Assert(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/1",
+            headers={"some_key": "some_value"},
+        )
+        request.assert_content_length()
+        request.assert_content_length(message="There's content-length")
+
 
 if __name__ == "__main__":
     unittest.main()
