@@ -65,7 +65,10 @@ class ApiKeyAuth(AuthBase):
     def __call__(self, r: models.Request) -> models.Request:
         if self.key and self.value is not None:
             if self.add_to == "headers":
-                r.headers["Authorization"] = self.key, self.value
+                # should we always put it on
+                # Authorization headers? what if:
+                # - we got different API format?
+                r.headers["Authorization"] = f"{self.key} {self.value}"
             elif self.add_to == "query_params":
                 r.params = {f"{self.key} : {self.value}"}
             else:
