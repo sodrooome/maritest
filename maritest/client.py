@@ -139,6 +139,18 @@ class Http:
             # if logger wasn't setup
             # only get the specific logger name
             self.logger = get_specific_logger
+            self.logger.propagate = True
+
+            logger_formatter = logging.Formatter(
+                fmt="%(asctime)s : %(name)s : %(funcName)s : %(message)s",
+                datefmt="%d-%m-%Y %I:%M:%S",
+            )
+
+            # if disable the logger, will receive
+            # the maritest file log
+            logger_file = logging.FileHandler("maritest.log")
+            logger_file.setFormatter(logger_formatter)
+            self.logger.addHandler(logger_file)
 
         self.timeout = None
         self.response = None
@@ -436,4 +448,12 @@ class Http:
 
     @abstractmethod
     def assert_expected_to_fail(self, message: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    def assert_content_length(self, message: str = None):
+        raise NotImplementedError
+
+    @abstractmethod
+    def assert_tls_secure(self, message: str = None):
         raise NotImplementedError
