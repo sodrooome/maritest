@@ -81,9 +81,13 @@ class TestHttpAssertion(unittest.TestCase):
             "userId": 10,
             "id": 100,
             "title": "at nam consequatur ea labore ea harum",
-            "body": "cupiditate quo est a modi nesciunt soluta\nipsa voluptas error itaque dicta in\nautem qui minus magnam et distinctio eum\naccusamus ratione error aut",
+            "body": "cupiditate quo est a modi nesciunt soluta\nipsa voluptas error itaque dicta in\nautem qui minus "
+                    "magnam et distinctio eum\naccusamus ratione error aut",
         }
-        expected_body_content = b'{\n  "userId": 10,\n  "id": 100,\n  "title": "at nam consequatur ea labore ea harum",\n  "body": "cupiditate quo est a modi nesciunt soluta\\nipsa voluptas error itaque dicta in\\nautem qui minus magnam et distinctio eum\\naccusamus ratione error aut"\n}'
+        expected_body_content = b'{\n  "userId": 10,\n  "id": 100,\n  "title": "at nam consequatur ea ' \
+                                b'labore ea harum",\n  "body": "cupiditate quo est a modi nesciunt soluta\\nipsa ' \
+                                b'voluptas error itaque dicta in\\nautem qui minus magnam et distinctio ' \
+                                b'eum\\naccusamus ratione error aut"\n}'
         request.assert_json_to_equal(expected_body, "This one should be success")
         request.assert_content_to_equal(expected_body_content, "sukses")
 

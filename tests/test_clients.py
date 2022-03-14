@@ -1,4 +1,5 @@
 import unittest
+from abc import ABC
 from unittest.case import expectedFailure
 from maritest.client import Http
 from maritest.custom_auth import (
@@ -10,14 +11,15 @@ from maritest.custom_auth import (
 )
 
 
-class MockMethod(Http):
+class MockMethod(Http, ABC):
     # this is only way that testing
     # for method that supposed
     # to be implemented already
-    def assert_is_ok(self):
+    def assert_is_ok(self, message: str):
         raise NotImplementedError
 
-    def concrete_method(self):
+    @staticmethod
+    def concrete_method():
         return True
 
 
@@ -38,7 +40,8 @@ class TestHttpClient(unittest.TestCase):
             "userId": 1,
             "id": 1,
             "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
-            "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
+            "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut "
+                    "quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
         }
         request = Http(
             method="POST",
@@ -58,7 +61,8 @@ class TestHttpClient(unittest.TestCase):
             "userId": 1,
             "id": 1,
             "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
-            "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
+            "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut "
+                    "quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
         }
         request = Http(
             method="PUT",
@@ -76,7 +80,8 @@ class TestHttpClient(unittest.TestCase):
             "userId": 1,
             "id": 1,
             "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
-            "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
+            "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut "
+                    "quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
         }
         request = Http(
             method="PATCH",
