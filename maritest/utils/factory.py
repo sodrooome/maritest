@@ -1,4 +1,5 @@
 import logging
+import requests
 from enum import Enum
 
 
@@ -13,35 +14,88 @@ class LogEnum(str, Enum):
     WARNING = "WARNING"
 
 
+class HttpHandler(logging.Handler):
+    def __init__(self, url: str, method: str, disabled: bool = False):
+        """Constructor for construct custom HTTP Handler
+
+        :param url: HTTP target that will be logging
+        :param method: HTTP method that represent action to takes
+        :param disabled: suppress HTTP response log if tend to disabled,
+        otherwise it will shown in command-line
+        """
+        self.url = url
+        self.method = method
+
+        # potentially redundant attribute with `silent`
+        # keep in mind: that these 2 attributes has
+        # same functionality with slightly different
+        # when HTTP target was called and emitted
+        self.disabled = disabled
+
+        super().__init__()
+
+    def emit(self, record):
+        """Sub-classes from `logging.Handler` that emitted
+        url response based on relevant HTTP method. It will
+        receive as record from HTTP target and formatted (if any)
+        """
+        http_log = self.format(record=record)
+
+        # im not sure if this needed or not
+        _ = requests.Request(method=self.method, url=self.url, data=http_log)
+
+        if not self.disabled:
+            print(http_log)
+
+
 class Logger:
     """Private class for logger factory"""
 
-    _logger = None
+    _logger = None  # instance variable
 
     @staticmethod
-    def __set_logger(log_level: str = None):
+    def __set_logger(
+        url: str, method: str, log_level: str = None, silent: bool = False
+    ):
         """
         Private method to create logger stream handler
         based on log_level argument. This method only
         accessible to call from static method, the entire
         method come handy to avoid repetitive or duplicate
         logging function when initialize in Http attribute
+
+        :param url: HTTP target that will be logging
+        :param method: HTTP method that represent action to takes
+        :param log_level: set level for logging HTTP, argument
+        value must be same with Enum class
+        :param silent: suppress HTTP response log, if disabled
+        then it will send as file log (maritest.log) if not,
+        then it will shown as STDOUT
         """
         Logger._logger = get_specific_logger
         Logger._logger.propagate = False
         Logger._logger.setLevel(logging.DEBUG)
 
-        logger_output = logging.StreamHandler()
-        logger_output.setLevel(logging.DEBUG)
-
         logger_formatter = logging.Formatter(
-            fmt="%(asctime)s | %(filename)s | %(funcName)s | %(message)s",
+            fmt="%(asctime)s : %(filename)s : %(funcName)s : %(message)s",
             datefmt="%d-%m-%Y %I:%M:%S",
         )
 
-        logger_output.setFormatter(logger_formatter)
-        Logger._logger.addHandler(logger_output)
+        http_handler = HttpHandler(url=url, method=method, disabled=False)
 
+        if not silent:
+            http_handler.setFormatter(logger_formatter)
+            Logger._logger.addHandler(http_handler)
+        else:
+            Logger._logger.propagate = True
+            logger_file = logging.FileHandler("maritest.log")
+            logger_file.setFormatter(logger_formatter)
+            Logger._logger.addHandler(logger_file)
+
+        # same with this expression, do i need
+        # keep this since the default of setLevel
+        # will set into static values while initiate
+        # in Http logger attribute
         if log_level == LogEnum.INFO:
             Logger._logger.setLevel(logging.INFO)
         elif log_level == LogEnum.DEBUG:
@@ -51,6 +105,8 @@ class Logger:
         return Logger._logger
 
     @staticmethod
-    def get_logger(log_level: str = None):
+    def get_logger(url: str, method: str, log_level: str = None, silent: bool = None):
         if log_level is not None:
-            return Logger.__set_logger(log_level=log_level)
+            return Logger.__set_logger(
+                url=url, method=method, log_level=log_level, silent=silent
+            )
