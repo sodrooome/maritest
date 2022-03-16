@@ -62,7 +62,7 @@ class ApiKeyAuth(AuthBase):
             self.value == getattr(other, "value")
         ])
 
-    def __call__(self, r: models.Request) -> models.Request:
+    def __call__(self, r: models.PreparedRequest) -> models.PreparedRequest:
         if self.key and self.value is not None:
             if self.add_to == "headers":
                 # should we always put it on
