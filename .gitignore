@@ -5,3 +5,4 @@ htmlcov/
 build/
 dist/
 maritest.egg-info/
+.mypy_cache/
