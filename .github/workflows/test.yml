@@ -28,8 +28,9 @@ jobs:
           pip install coverage
       - name: Test with tox
         run: tox
-      - name: Generat code coverage
+      - name: Generate code coverage
         run: |
           coverage run -m unittest
+          coverage xml
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v2
