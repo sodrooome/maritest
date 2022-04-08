@@ -113,7 +113,7 @@ class Assert(Http):
             message = "The request has no text object"
             raise AssertionError(message)
 
-    def assert_status_code_in(self, status_code: list[int], message: str):
+    def assert_status_code_in(self, status_code: int, message: str):
         expected_result = [str(code) for code in status_code]
         actual_result = str(self.response.status_code)
         if actual_result in expected_result:
@@ -122,7 +122,7 @@ class Assert(Http):
             message = "The expected status code didn't match with actual result"
             raise AssertionError(message)
 
-    def assert_status_code_not_in(self, status_code: list[int], message: str):
+    def assert_status_code_not_in(self, status_code: int, message: str):
         expected_result = [str(code) for code in status_code]
         actual_result = str(self.response.status_code)
         if actual_result not in expected_result:
