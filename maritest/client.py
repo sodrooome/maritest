@@ -16,19 +16,22 @@ Initial code: Ryan Febriansyah, 03-12-2021
 try:
     import requests
 except ImportError as e:
-    raise Exception(f"Unable to importerd `requests` package {e}")
+    raise Exception(f"Unable to imported `requests` package {e}")
 
-import logging
-import warnings
-import urllib3
 import json
+import logging
 import urllib.parse
-from .version import __version__
+import warnings
 from abc import abstractmethod
-from requests.sessions import CaseInsensitiveDict
-from requests.packages.urllib3.util.retry import Retry
-from requests.adapters import HTTPAdapter
 from contextlib import contextmanager
+from typing import Tuple, Any
+
+import urllib3
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry  # type: ignore
+from requests.sessions import CaseInsensitiveDict
+
+from .version import __version__
 
 # For our purposes,
 # its only supported 5 HTTP method
@@ -47,21 +50,6 @@ def disable_warnings():
         yield None
 
 
-def response_hook(response: requests.Response, *args, **kwargs):
-    return response.raise_for_status(), *args, kwargs
-
-
-# TODO: also split this function callable
-def default_headers():
-    return CaseInsensitiveDict(
-        {
-            "User-Agent": f"maritest, {__version__}",
-            "Accept": "*/*",
-            "Connection": "keep-alive",
-        }
-    )
-
-
 class Http:
     """
     This is a base class for HTTP client
@@ -78,6 +66,10 @@ class Http:
         retry: bool = True,
         supress_warning: bool = None,
         proxy: dict = None,
+        data: dict = None,
+        params: dict = None,
+        files: dict = None,
+        auth: Tuple = None,
         **kwargs,
     ) -> None:
         """
@@ -103,8 +95,17 @@ class Http:
         :param kwargs: given by keyword argument
         :param auth: Authentication configuration for using
         HTTP client, by default set to None
+        :param data: Append file like object in the request body,
+        set to None or optional.
+        :param files: Append file like object with defining
+        content-type of that file. set to None or optional
+        :param params: Append query string when request in url,
+        set to None or optional.
+        :param auth: arguments for doing authentication request
+        to the HTTP target. Support common HTTP auth, and by
+        default set to None.
 
-        Returned as HTTP response
+        Returned as HTTP response object
         """
         # missing attributes :
         # session, certs, file, json, data
@@ -155,9 +156,9 @@ class Http:
         self.timeout = None
         self.response = None
         self.json = None
-        self.data = None
-        self.params = None
-        self.files = None
+        self.data = data
+        self.params = params
+        self.files = files
         self.proxy = proxy
         self.allow_redirects = allow_redirects
         self.stream = False
@@ -167,19 +168,8 @@ class Http:
         )
         self.verify = None
         self.session = None
-        self.auth = None
-
-        if logger:
-            # why the heck am i validate
-            # the logger twice ??
-            self.logger.info(f"[INFO] HTTP Request {self.method} => {self.url}")
-            self.logger.debug(f"[DEBUG] HTTP Request {self.headers} => {self.url}")
-
-        if headers is None:
-            # enforcing headers alwasy
-            # wrap themselves with dict type
-            # merge with pre-defined headers
-            self.headers = default_headers()
+        self.auth = auth
+        self.created_session = False  # flagging to close request session
 
         if self.timeout is None:
             self.timeout = 120
@@ -190,16 +180,13 @@ class Http:
         if self.method not in iter(ALLOWED_METHODS):
             raise NotImplementedError(f"Currently {self.method} method not supported")
 
-        if self.response is None:
-            self.response = requests.Response
-
-        if self.data is None:
+        if data is None:
             self.data = {}
 
-        if self.params is None:
+        if params is None:
             self.params = {}
 
-        if self.files is None:
+        if files is None:
             self.files = {}
 
         if self.json is None:
@@ -209,8 +196,20 @@ class Http:
             self.json = json.dumps(self.json, indent=2, sort_keys=False)
 
         # new attribute to call the request session instance
+        # if session is emitted to None object, then should
+        # be called the create_session method to handling the request
         if self.session is None:
-            self.session = requests.Session()
+            self.session = self.create_session(**kwargs)
+
+        if self.response is None:
+            self.response = self.make_response()
+            self.created_session = True
+
+        if headers is None:
+            # enforcing headers always
+            # wrap themselves with dict type
+            # merge with pre-defined headers
+            self.headers = self.default_headers()
 
         # by default, using proxies only
         # for HTTPS over HTTP connection
@@ -252,7 +251,9 @@ class Http:
             files=self.files,
             auth=self.auth,
         )
-        prepare_request = request.prepare()
+
+        # https://docs.python-requests.org/en/master/user/advanced/#session-objects
+        prepare_request = self.session.prepare_request(request)
 
         # before final request, check
         # whether environment has proxies protocol or not
@@ -273,18 +274,20 @@ class Http:
                     self.retry = Retry(
                         total=3,
                         status_forcelist=[429, 500, 502, 503, 504],
-                        method_whitelist=["GET", "POST"],
+                        method_whitelist=frozenset(
+                            {"DELETE", "GET", "HEAD", "OPTIONS", "PUT"}
+                        ),
                         backoff_factor=0.3,
                     )
                     adapter = HTTPAdapter(max_retries=self.retry)
                     if urllib.parse.urlparse(self.url).scheme == "http":
-                        s.mount("https://", adapter)
-                    else:
                         # only given a log warning for user
-                        s.mount("http://", adapter)
+                        s.mount("https://", adapter)
                         self.logger.warning(
                             f"[WARNING] you're going to mounted unverified (HTTP) protocol"
                         )
+                    else:
+                        s.mount("http://", adapter)
                 else:
                     self.logger.info("[INFO] HTTP retry method might be turned it off")
                 self.response = s.send(request=prepare_request, **kwargs)
@@ -293,8 +296,17 @@ class Http:
             # temporary using requests exception
             # TODO: make base class for custom exceptio
             raise Exception(f"HTTP Request was timeout {e}")
-        except requests.exceptions.ConnectionError as e:
-            raise Exception(f"HTTP Request was failed {e}")
+        except (
+            requests.exceptions.SSLError,
+            requests.exceptions.MissingSchema,
+        ) as e:
+            raise Exception(f"HTTP Request was invalid {e}")
+        except requests.exceptions.HTTPError as e:
+            raise Exception(f"HTTP Request was error {e}")
+        except KeyError as e:
+            raise Exception(f"There's no any key to that HTTP response => {e}")
+        except json.JSONDecodeError as e:
+            raise Exception(f"Exception occur when try to unpack the JSON => {e}")
         except Exception as e:
             raise Exception(f"Other exception was occur {e}")
         finally:
@@ -308,11 +320,12 @@ class Http:
             # call the valid response name instead
             # only call the message from related assertion
             self.response.raise_for_status()
-            s.hooks["response"] = [response_hook]
 
     def __str__(self) -> str:
         if self.method and self.url is not None:
             return f"You're using Maritest with HTTP Request {self.url} | {self.method}"
+        else:
+            return f"You're using Maritest without setup URL or HTTP verbs method"
 
     def __repr__(self) -> str:
         return f"<Http:{self.method}=>{self.url}>"
@@ -332,34 +345,46 @@ class Http:
 
     def __exit__(self):
         # exit the connection pooling
-        # after send the final request
+        # after send the final request so
+        # all HTTP response can't be
+        # accessible again, so for example:
+        # if you tend to get the HTTP headers
+        # outside Http() class scope, you
+        # wont get any response for that
         self.response.close()
 
-    # add setter-getter only for
-    # base_url or HTTP method
-    @property
-    def url(self) -> str:
-        return self._url
+    def __del__(self):
+        # delete all adapters based on
+        # the request.session(),
+        # marked by flag instance of
+        # self.created_session attribute
+        if self.created_session:
+            self.session.close()
+            self.created_session = False
 
-    @url.setter
-    def url(self, value: str) -> str:
-        self._url = value
+    @staticmethod
+    def create_session(**kwargs):
+        """Handling the session requests"""
+        session = requests.Session()
+        for key in kwargs:
+            setattr(session, key, kwargs[key])
+        return session
 
-    @url.deleter
-    def url(self) -> None:
-        del self._url
+    @staticmethod
+    def default_headers():
+        """Given default HTTP headers for maritest"""
+        return CaseInsensitiveDict(
+            {
+                "User-Agent": f"maritest, {__version__}",
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+            }
+        )
 
-    @property
-    def method(self):
-        return self._method
-
-    @method.setter
-    def method(self, value: str) -> str:
-        self._method = value
-
-    @method.deleter
-    def method(self) -> None:
-        del self._method
+    @staticmethod
+    def make_response():
+        """Handling the HTTP response object"""
+        return requests.Response()
 
     # this one act as an
     # instances for assertion tests

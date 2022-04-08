@@ -41,13 +41,12 @@ class TestHttpClient(unittest.TestCase):
             "id": 1,
             "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
             "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut "
-                    "quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
+            "quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
         }
         request = Http(
             method="POST",
             url="https://jsonplaceholder.typicode.com/posts",
             headers={"some_key": "some_value"},
-            proxies={"https": "https://google.com"},
             json=request_body,
             logger=False,
             timeout=True,
@@ -62,7 +61,7 @@ class TestHttpClient(unittest.TestCase):
             "id": 1,
             "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
             "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut "
-                    "quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
+            "quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
         }
         request = Http(
             method="PUT",
@@ -81,7 +80,7 @@ class TestHttpClient(unittest.TestCase):
             "id": 1,
             "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
             "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut "
-                    "quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
+            "quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
         }
         request = Http(
             method="PATCH",
@@ -235,6 +234,47 @@ class TestHttpClient(unittest.TestCase):
             timeout=True,
         )
         self.assertEqual(200, request.response.status_code)
+
+    def test_url_with_params(self):
+        payload_params = {"key1": "value1", "key2": "value2"}
+        request = Http(
+            method="GET",
+            url="https://httpbin.org/get",
+            headers={},
+            timeout=False,
+            params=payload_params,
+        )
+
+        expected_url = "https://httpbin.org/get?key1=value1&key2=value2"
+        self.assertEqual(200, request.response.status_code)
+        self.assertEqual(request.response.url, expected_url)
+        self.assertTrue(request.url, expected_url)
+
+    def test_url_with_params_data(self):
+        payload_params = {"key1": "value1", "key2": "value2"}
+        payload_data = {"key-1": "value-1"}
+        request = Http(
+            method="POST",
+            url="https://httpbin.org/post",
+            headers={"content-type": "application/json"},
+            timeout=False,
+            params=payload_params,
+            data=payload_data,
+        )
+
+        expected_url = "https://httpbin.org/get?key1=value1&key2=value2"
+        self.assertEqual(200, request.response.status_code)
+        self.assertTrue(request.url, expected_url)
+
+    def test_proxies_request(self):
+        request = Http(
+            method="GET",
+            url="http://github.com",
+            headers={},
+            proxy={"https": "https://github.com"},
+            retry=True,
+        )
+        self.assertTrue(request.response.status_code, 200)
 
 
 if __name__ == "__main__":

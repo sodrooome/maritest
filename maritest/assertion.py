@@ -14,6 +14,7 @@ limitations under the License.
 Initial code: Ryan Febriansyah, 20-12-2021
 """
 import json
+from typing import Optional
 from .client import Http
 
 
@@ -64,11 +65,11 @@ class Assert(Http):
             return print(message)
 
     def assert_is_2xx_status(self, message: str):
-        if 200 <= self.response.status_code < 300:
-            return print(message, f"The status code was : {self.response.status_code}")
-        else:
-            message = "The status got 2xx"
+        if not 200 <= self.response.status_code < 300:
+            message = "The status not 2xx"
             raise AssertionError(message)
+        else:
+            print(message)
 
     def assert_is_3xx_status(self, message: str):
         if not 300 <= self.response.status_code < 400:
@@ -112,7 +113,7 @@ class Assert(Http):
             message = "The request has no text object"
             raise AssertionError(message)
 
-    def assert_status_code_in(self, status_code: str, message: str):
+    def assert_status_code_in(self, status_code: int, message: str):
         expected_result = [str(code) for code in status_code]
         actual_result = str(self.response.status_code)
         if actual_result in expected_result:
@@ -121,7 +122,7 @@ class Assert(Http):
             message = "The expected status code didn't match with actual result"
             raise AssertionError(message)
 
-    def assert_status_code_not_in(self, status_code: str, message: str):
+    def assert_status_code_not_in(self, status_code: int, message: str):
         expected_result = [str(code) for code in status_code]
         actual_result = str(self.response.status_code)
         if actual_result not in expected_result:
@@ -156,7 +157,7 @@ class Assert(Http):
             message = "The duration exceeds the limit"
             raise AssertionError(message)
 
-    def assert_text_to_equal(self, obj: str, message: str):
+    def assert_text_to_equal(self, obj: Optional[bytes], message: str):
         if self.response.text:
             return print(isinstance(obj, str)), message
         else:
