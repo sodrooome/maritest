@@ -25,5 +25,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install tox tox-gh-actions
+          pip install coverage
       - name: Test with tox
         run: tox
+      - name: Generat code coverage
+        run: |
+          coverage run -m unittest
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v2
