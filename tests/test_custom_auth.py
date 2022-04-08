@@ -1,7 +1,13 @@
 import unittest
 import requests
 import requests_mock  # type: ignore
-from maritest.custom_auth import ApiKeyAuth, BasicAuth, BearerAuth, BasicAuthToken
+from maritest.custom_auth import (
+    ApiKeyAuth,
+    BasicAuth,
+    BearerAuth,
+    BasicAuthToken,
+    DigestAuth,
+)
 
 
 class TestCustomAuth(unittest.TestCase):
@@ -13,9 +19,10 @@ class TestCustomAuth(unittest.TestCase):
             )
 
         bearer_auth = BearerAuth("testtest")
-        response = requests.get("https://github.com", auth=bearer_auth)
+        response = requests.get("https://httpbin.org/bearer", auth=bearer_auth)
 
         self.assertTrue(response.status_code, 200)
+        self.assertTrue(response.json(), "{'authenticated': true, 'token': 'testtest'}")
 
     def test_basic_auth_token(self):
         with requests_mock.mock() as m:
@@ -56,10 +63,25 @@ class TestCustomAuth(unittest.TestCase):
         with requests_mock.mock() as m:
             m.get(requests_mock.ANY, text="Success Mock HTTP")
 
-        basic_auth = BasicAuth(username="fake username", password="fake password")
-        response = requests.get("https://github.com", auth=basic_auth)
+        basic_auth = BasicAuth(username="ryan", password="1234")
+        response = requests.get(
+            "https://httpbin.org/basic-auth/ryan/1234", auth=basic_auth
+        )
 
         self.assertTrue(response.status_code, 200)
+        self.assertTrue(response.json(), "{'authenticated': True, 'user': 'ryan'}")
+
+    def test_digest_auth(self):
+        with requests_mock.mock() as m:
+            m.get("https://httpbin.org/digest-auth/auth/user/pass")
+
+        digest_auth = DigestAuth(username="user", password="pass")
+        response = requests.get(
+            "https://httpbin.org/digest-auth/auth/user/pass", auth=digest_auth
+        )
+
+        self.assertTrue(response.status_code, 200)
+        self.assertTrue(response.json(), "'authenticated': True, 'user': 'user'")
 
 
 if __name__ == "__main__":
