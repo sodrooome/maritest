@@ -1,0 +1,19 @@
+[run]
+branch = True
+
+# exclude all possibilites code or function
+# that not getting hit when perform test execution
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
+    @(abc\.)?abstractmethod
+
+[html]
+directory = coverage_html_report
