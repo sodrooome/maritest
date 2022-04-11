@@ -42,4 +42,4 @@ def deprecated(message: str, version: str = None) -> Any:
 
         return decorator_func
     else:
-        raise TypeError("message or reason must be string object")
+        raise TypeError("message or reason must be string object")  # pragma: no cover

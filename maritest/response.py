@@ -24,7 +24,7 @@ class Response(Http, ABC):
         Returned formatted HTTP response
         """
         if not type(format):
-            raise TypeError("Parameter format must be string object")
+            raise TypeError("Parameter format must be string object")  # pragma: no cover
 
         if format.lower() not in ["multipart", "text", "json"]:
             raise NotImplementedError("There's no format that match with argument")
@@ -91,7 +91,7 @@ class Response(Http, ABC):
                     "`allow_redirects` settings "
                 )
         except Exception as e:
-            raise Exception(f"Another exception was occurs {e}")
+            raise Exception(f"Another exception was occurs {e}")  # pragma: no cover
 
         print(f"Count history : {response_count}", response_body)
 
