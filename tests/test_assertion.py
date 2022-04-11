@@ -218,6 +218,127 @@ class TestHttpAssertion(unittest.TestCase):
         request.assert_content_length()
         request.assert_content_length(message="There's content-length")
 
+    # below here is a collection of negative test scenarios
+    # the opposite of the positive scenario in the assertion module
+    # why would do this due to coverage all unexpected issue
+    # that led to won't raise AssertionError
+    @expectedFailure
+    def test_assert_is_ok(self):
+        request = Assert(
+            method="GET",
+            url="https://httpbin.org/status/404",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+        )
+        request.assert_is_ok(message="Not ok but success")
+
+    @expectedFailure
+    def test_assert_is_failed(self):
+        request = Assert(
+            method="GET",
+            url="https://httpbin.org/status/200",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+        )
+        request.assert_is_failed(message="Supposed to be failed but okay")
+
+    @expectedFailure
+    def test_assert_expected_to_failed(self):
+        request = Assert(
+            method="GET",
+            url="https://httpbin.org/status/404",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+        )
+        request.assert_expected_to_fail(message="Already failed the request")
+
+    @expectedFailure
+    def test_assert_response_time(self):
+        request = Assert(
+            method="GET",
+            url="https://httpbin.org/status/200",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+        )
+        request.assert_response_time(duration=0.1, message="Should exceed the limit")
+
+    @expectedFailure
+    def test_assert_4xx_status_code(self):
+        request = Assert(
+            method="GET",
+            url="https://httpbin.org/status/200",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+        )
+        request.assert_is_4xx_status(message="Should be on 4xx status code")
+
+    @expectedFailure
+    def test_assert_5xx_status_code(self):
+        request = Assert(
+            method="GET",
+            url="https://httpbin.org/status/200",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+        )
+        request.assert_is_5xx_status(message="Should be on 5xx status code")
+
+    @expectedFailure
+    def test_assert_2xx_status_code(self):
+        request = Assert(
+            method="GET",
+            url="https://httpbin.org/status/400",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+        )
+        request.assert_is_2xx_status(message="Should be on 2xx status code")
+
+    @expectedFailure
+    def test_assert_not_content_type(self):
+        request = Assert(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+        )
+        request.assert_content_type_to_equal(
+            value="application/json", message="Content-type not equal"
+        )
+
+    @expectedFailure
+    def test_assert_not_json_equal(self):
+        request = Assert(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/100",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+        )
+        expected_body = {"empty-key": "empty-value"}
+        request.assert_json_to_equal(expected_body, "This one not equal with response")
+
+    @expectedFailure
+    def test_assert_not_content_equal(self):
+        request = Assert(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/100",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+        )
+        expected_body_content = b'meu\\ratio ratio ratio"\n}'
+        request.assert_content_to_equal(
+            expected_body_content, "This one not equal with response"
+        )
+
+
 
 if __name__ == "__main__":
     unittest.main()

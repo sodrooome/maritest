@@ -276,6 +276,40 @@ class TestHttpClient(unittest.TestCase):
         )
         self.assertTrue(request.response.status_code, 200)
 
+    def test_suppress_warning_on(self):
+        request = Http(
+            method="GET",
+            url="https://httpbin.org/stream/20",
+            headers={},
+            logger=True,
+            supress_warning=True,
+        )
+        self.assertTrue(request.suppress_warning, True)
+        self.assertTrue(request.response.status_code, 200)
+
+    def test_suppress_warning_off(self):
+        request = Http(
+            method="GET",
+            url="https://httpbin.org/stream/20",
+            headers={},
+            logger=True,
+            supress_warning=False,
+        )
+        self.assertFalse(request.suppress_warning, False)
+        self.assertTrue(request.response.status_code, 200)
+
+    @expectedFailure
+    def test_proxy_with_http(self):
+        request = Http(
+            method="GET",
+            url="https://httpbin.org/stream/20",
+            headers={},
+            logger=True,
+            proxy={"http": "http://httpbin.org/stream/20"},
+        )
+        self.assertTrue(request.proxy, True)  # pragma: no cover
+        self.assertEqual(request.proxy.keys(), "http")  # pragma: no cover
+
 
 if __name__ == "__main__":
     unittest.main()
