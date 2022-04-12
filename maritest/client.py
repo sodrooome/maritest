@@ -18,19 +18,20 @@ try:
 except ImportError as e:
     raise Exception(f"Unable to imported `requests` package {e}")
 
-import json
+# import json
 import logging
 import urllib.parse
 import warnings
 from abc import abstractmethod
 from contextlib import contextmanager
-from typing import Tuple, Any
+from typing import Any, Tuple
 
 import urllib3
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry  # type: ignore
 from requests.sessions import CaseInsensitiveDict
 
+from .serializable import JsonSerializer
 from .version import __version__
 
 # For our purposes,
@@ -70,6 +71,7 @@ class Http:
         params: dict = None,
         files: dict = None,
         auth: Tuple = None,
+        json: dict = None,
         **kwargs,
     ) -> None:
         """
@@ -104,6 +106,8 @@ class Http:
         :param auth: arguments for doing authentication request
         to the HTTP target. Support common HTTP auth, and by
         default set to None.
+        :param json: argument for sending a request in HTTP body
+        with JSON-format. By default set to None or optional
 
         Returned as HTTP response object
         """
@@ -155,7 +159,7 @@ class Http:
 
         self.timeout = None
         self.response = None
-        self.json = None
+        self.json = json
         self.data = data
         self.params = params
         self.files = files
@@ -189,11 +193,11 @@ class Http:
         if files is None:
             self.files = {}
 
-        if self.json is None:
+        if json is None:
             self.json = {}
         else:
             # printed JSON response with formatted output
-            self.json = json.dumps(self.json, indent=2, sort_keys=False)
+            self.json = JsonSerializer(object=self.json)
 
         # new attribute to call the request session instance
         # if session is emitted to None object, then should
