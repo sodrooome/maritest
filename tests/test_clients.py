@@ -310,6 +310,17 @@ class TestHttpClient(unittest.TestCase):
         self.assertTrue(request.proxy, True)  # pragma: no cover
         self.assertEqual(request.proxy.keys(), "http")  # pragma: no cover
 
+    def test_send_json_argument(self):
+        json_payload = {"key": "value", "array": [{"json": "array"}, 0]}
+        request = Http(
+            method="POST",
+            url="https://httpbin.org/post",
+            headers={},
+            logger=True,
+            json=json_payload,
+        )
+        self.assertTrue(request.response.status_code, 200)
+
 
 if __name__ == "__main__":
     unittest.main()
