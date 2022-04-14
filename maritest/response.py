@@ -8,7 +8,9 @@ from .client import Http
 class Response(Http, ABC):
     """
     Formatted HTTP response and returned
-    as either dict, text or binary
+    as either dict, text or binary response.
+    An inheritance class that sub-classing from
+    Http Client in maritest.client module
     """
 
     def retriever(self, format: str = "json"):
@@ -18,13 +20,15 @@ class Response(Http, ABC):
         multipart and text
 
         :param format: Parameter for choose what kind
-        of response that want to returned, by default
-        set as JSON
+            of response that want to returned, by default
+            set as JSON
 
         Returned formatted HTTP response
         """
         if not type(format):
-            raise TypeError("Parameter format must be string object")  # pragma: no cover
+            raise TypeError(
+                "Parameter format must be string object"
+            )  # pragma: no cover
 
         if format.lower() not in ["multipart", "text", "json"]:
             raise NotImplementedError("There's no format that match with argument")
@@ -49,7 +53,7 @@ class Response(Http, ABC):
                 else:
                     # need request body to debug when the
                     # error is occur during requested HTTP target
-                    response_body = {
+                    response_body = {  # pragma: no cover
                         "request": {
                             "request_url": self.url,
                             "request_method": self.method,

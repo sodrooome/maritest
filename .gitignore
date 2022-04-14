@@ -6,3 +6,6 @@ build/
 dist/
 maritest.egg-info/
 .mypy_cache/
+_build/
+_static/
+_templates/
