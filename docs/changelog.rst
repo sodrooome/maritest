@@ -2,8 +2,8 @@
 Changelog
 =========
 
-**v0.5.0 (Planning)**
----------------------
+**v0.5.0 (development)**
+------------------------
 
 - [Fixed] Attribute object of  `auth`, `data` , `params` and `files` needs to be called in argument
 - [Fixed] Remove unused `raise_for_status` method when raise error

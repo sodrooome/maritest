@@ -18,7 +18,7 @@ There are several ways for using this framework, the first one is when you send 
 
 **important keynotes** : argument for `method`, `url` and `headers` are required, so you'll expected to full fill all of them. If you feel that you don't need `headers` argument, you can fill it with empty `dict` .
 
-Other keynote is, the different usage when using `Assert` and `Http` method are when using the `Http` method, **you will not be able** to do assertion tests for the target because that method is an abstract base class for the `Assert` class. Other than that, the use of parameters and functions will remain the same
+Other keynote is, the different usage when using `Assert` and `Http` method are when using the `Http` method, you will not be able to do assertion tests for the target because that method is an abstract base class for the `Assert` class. Other than that, the use of parameters and functions will remain the same
 
 There are several arguments / parameters that you can also pass it when making an HTTP request, and the mechanism itself is similar to when you use the requests package. those arguments consisted of :
 
@@ -57,6 +57,15 @@ Enable retry parameter to retry and send HTTP request again. Particularly, i do 
 .. code-block:: python
 
     >>> request = Assert(method="GET", url="http://your-url", retry=True)
+
+You eventually can see whether the retry function is being process or not by enabling the logger parameter same as like on the previous example. If you tend to disable this retry argument, the log stream handler will informed you like :
+
+.. code-block:: python
+
+    >>> request = Assert(method="GET", url="http://your-url", retry=False, logger=True)
+
+    # information from logger
+    19-12-2021 12:12:30 : Maritest Logger : __init__ : [INFO] HTTP retry method might be turned it off
 
 
 Using timeout to delay request

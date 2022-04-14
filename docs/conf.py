@@ -14,11 +14,15 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
+
 
 # -- Project information -----------------------------------------------------
 
 project = 'maritest'
-copyright = '2021, Ryan Febriansyah'
+copyright = '2022, Ryan Febriansyah'
 author = 'Ryan Febriansyah'
 
 
@@ -28,7 +32,7 @@ author = 'Ryan Febriansyah'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx_rtd_theme',
+    'sphinx_rtd_theme', 'sphinx.ext.autodoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

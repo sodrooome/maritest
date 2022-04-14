@@ -68,7 +68,7 @@ After you're done with installation, you can try to use this basic feature from 
       request.assert_is_content_type(message=None)
       request.assert_response_time(duration=300)
 
-Afterwards, wrap up that configuration and just run that file and it will automatically, the assertion testing process will execute without us **needs to define the actual result or also set the expected result**. If any of the assertion methods above it's fail, it will raise an error message.
+Afterwards, wrap up that configuration and just run that file and it will automatically, the assertion testing process will execute without us needs to define the actual result or also set the expected result. If any of the assertion methods above it's fail, it will raise an error message.
 
 For more detailed information of using **Maritest** please refer to the general usage.
 
@@ -76,7 +76,9 @@ For more detailed information of using **Maritest** please refer to the general 
    :hidden:
     
    guides
+   assertion
    authentication
    response
    changelog
    upcoming
+   references

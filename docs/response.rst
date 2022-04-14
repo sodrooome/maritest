@@ -2,7 +2,7 @@
 HTTP Response
 =============
 
-With using maritest, we can also see the HTTP response object from what we have tested before. Basically HTTP responses can be divided into 3 categories, the first is in the form of bytes-like objects, the second is JSON format and the third is multipart. To get these three responses, you need to use the response module from maritest as follows :
+With using maritest, we can also see the HTTP response object from what we have tested before. Basically HTTP responses can be split up into 3 categories, the first is in the form of bytes-like objects, the second is JSON format and the third is multipart. To get these three responses, you need to use the response module from maritest as follows :
 
 .. code-block:: python
 
@@ -17,7 +17,7 @@ With using maritest, we can also see the HTTP response object from what we have 
 
     json_response = request.retriever(format="json")
     multipart_response = request.retriever(format="multipart")
-    bytes_response = request.retriever(format="bytes")
+    bytes_response = request.retriever(format="content")
 
 In addition to the three HTTP responses, **Maritest** also provides a custom method to return a raw HTTP response, you can use it looks like this :
 
