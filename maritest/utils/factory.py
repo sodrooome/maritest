@@ -21,7 +21,7 @@ class HttpHandler(logging.Handler):
         :param url: HTTP target that will be logging
         :param method: HTTP method that represent action to takes
         :param disabled: suppress HTTP response log if tend to disabled,
-        otherwise it will shown in command-line
+            otherwise it will shown in command-line
         """
         self.url = url
         self.method = method
@@ -35,7 +35,8 @@ class HttpHandler(logging.Handler):
         super().__init__()
 
     def emit(self, record):
-        """Sub-classes from `logging.Handler` that emitted
+        """
+        Sub-classes from `logging.Handler` that emitted
         url response based on relevant HTTP method. It will
         receive as record from HTTP target and formatted (if any)
         """
@@ -67,10 +68,10 @@ class Logger:
         :param url: HTTP target that will be logging
         :param method: HTTP method that represent action to takes
         :param log_level: set level for logging HTTP, argument
-        value must be same with Enum class
+            value must be same with Enum class
         :param silent: suppress HTTP response log, if disabled
-        then it will send as file log (maritest.log) if not,
-        then it will shown as STDOUT
+            then it will send as file log (maritest.log) if not,
+            then it will shown as STDOUT
         """
         Logger._logger = get_specific_logger
         Logger._logger.propagate = False

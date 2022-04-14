@@ -1,18 +1,3 @@
-"""
-Copyright 2021 A Job Thing Sdn Bhd.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-   http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-Initial code: Ryan Febriansyah, 03-12-2021
-"""
 try:
     import requests
 except ImportError as e:
@@ -53,7 +38,43 @@ def disable_warnings():
 
 class Http:
     """
-    This is a base class for HTTP client
+    This is a base class for HTTP client.
+    Constructor for request HTTP target, with
+    several parameter to construct it :
+
+    :param method: HTTP method verb, string type. such as:
+        "GET", "POST", and other supported HTTP method
+    :param url: base url for HTTP target, string type
+    :param headers: HTTP content headers, by default always set to dict object
+    :param allow_redirects: Enable redirection to other 
+        HTTP target if previous one wasn't respond it. set None
+    :param logger: Logger stream handler with formatted
+        output of message, by default set True
+    :param event_hooks: Given valid response, by default
+        set to False
+    :param retry: Enable retry mechanism with default total
+        attempts up-to 3, by default set to True
+    :param suppress_warning: Verification of SSL certificate, if
+        set False, will suppressed warning message
+    :param proxy: HTTP proxies configuration, by default
+        always set to None, and must be configured in HTTPS
+    :param kwargs: given by keyword argument for allow_redirects
+        or timeout
+    :param auth: Authentication configuration for using
+        HTTP client, by default set to None
+    :param data: Append file like object in the request body,
+        set to None or optional.
+    :param files: Append file like object with defining
+        content-type of that file. set to None or optional
+    :param params: Append query string when request in url,
+        set to None or optional.
+    :param auth: arguments for doing authentication request
+        to the HTTP target. Support common HTTP auth, and by
+        default set to None.
+    :param json: argument for sending a request in HTTP body
+        with JSON-format. By default set to None or optional
+
+    Returned as HTTP response object
     """
 
     def __init__(
@@ -74,43 +95,6 @@ class Http:
         json: dict = None,
         **kwargs,
     ) -> None:
-        """
-        Constructur for request HTTP target, with
-        several parameter to construct it :
-
-        :param method: HTTP method verb, string type
-        :param url: base url for HTTP target, string type
-        :param headers: HTTP content headers, by default always
-        set to dict object
-        :param allow_redirects: Enable redirection to other
-        HTTP target if previous one wasn't respond it. set None
-        :param logger: Logger stream handler with formatted
-        output of message, by default set True
-        :param event_hooks: Given valid response, by default
-        set to False
-        :param retry: Enable retry mechanism with default total
-        attempts up-to 3, by default set to True
-        :param suppress_warning: Verification of SSL certificate, if
-        set False, will suppressed warning message
-        :param proxy: HTTP proxies configuration, by default
-        always set to None, and must be configured in HTTPS
-        :param kwargs: given by keyword argument
-        :param auth: Authentication configuration for using
-        HTTP client, by default set to None
-        :param data: Append file like object in the request body,
-        set to None or optional.
-        :param files: Append file like object with defining
-        content-type of that file. set to None or optional
-        :param params: Append query string when request in url,
-        set to None or optional.
-        :param auth: arguments for doing authentication request
-        to the HTTP target. Support common HTTP auth, and by
-        default set to None.
-        :param json: argument for sending a request in HTTP body
-        with JSON-format. By default set to None or optional
-
-        Returned as HTTP response object
-        """
         # missing attributes :
         # session, certs, file, json, data
         self.method = method
@@ -376,7 +360,10 @@ class Http:
 
     @staticmethod
     def default_headers():
-        """Given default HTTP headers for maritest"""
+        """
+        Given default HTTP headers for maritest
+        if headers argument wasn't set at the first time
+        """
         return CaseInsensitiveDict(
             {
                 "User-Agent": f"maritest, {__version__}",

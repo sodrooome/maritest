@@ -10,9 +10,11 @@ def deprecated(message: str, version: str = None) -> Any:
     about deprecated method or class in all maritest modules
 
     :param message: required argument, message for identifying
-    what method or classes has been deprecated
+        what method or classes has been deprecated. string type
     :param version: optional argument, what versioning numbers
-    that going deprecated
+        that going deprecated. string type but optional to set
+
+    Returned as WarningMessage about related deprecation method/class
     """
     if isinstance(message, str):
 

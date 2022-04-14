@@ -42,18 +42,19 @@ class BasicAuthToken(AuthBase):
 class ApiKeyAuth(AuthBase):
     """
     Custom API key auth that will append
-    into headers, this one is influenced
+    into HTTP headers. this one is influenced
     by Postman QueryApiKey authorization
+
     :param key: set API key if present, string type
     :param value: set API value for related key
-    if present, string type
+        if present, string type
     :param add_to: mandatory argument to describes
-    what kind of method that wants to be add. Support
-    add to HTTP headers and add url with given by
-    query params.
+        what kind of method that wants to be add. Support
+        add to HTTP headers and add url with given by
+        query params.
     :param header_name: give valid HTTP header name
-    to related field, If its not set the header name, then
-    by default will be directed into X-API-KEY field
+        to related field, If its not set the header name, then
+        by default will be directed into X-API-KEY field
     """
 
     def __init__(
