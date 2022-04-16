@@ -117,7 +117,7 @@ class Assert(Http):
         if actual_result in expected_result:
             return print(message)
         else:
-            message = "The expected status code didn't match with actual result"
+            message = "The expected status code didn't match with actual result"  # pragma: no cover
             raise AssertionError(message)
 
     def assert_status_code_not_in(self, status_code: int, message: str):
@@ -128,7 +128,7 @@ class Assert(Http):
             return print(message)
         else:
             message = (
-                "The expected status code (actually) did matched with actual result"
+                "The expected status code (actually) did matched with actual result"  # pragma: no cover
             )
             raise AssertionError(message)
 
@@ -162,14 +162,14 @@ class Assert(Http):
         if self.response.text:
             return print(isinstance(obj, str)), message
         else:
-            message = f"Str type doesn't match with {obj}"
+            message = f"Str type doesn't match with {obj}"  # pragma: no cover
             raise AssertionError(message)
 
     def assert_dict_to_equal(self, obj: dict, message: str):
         if self.response.json:
             return print(isinstance(obj, dict)), message
         else:
-            message = f"Dict type doesn't match with {obj}"
+            message = f"Dict type doesn't match with {obj}"  # pragma: no cover
             raise AssertionError(message)
 
     def assert_response_time_less(self, message: str):
