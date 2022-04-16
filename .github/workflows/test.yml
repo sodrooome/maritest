@@ -34,6 +34,6 @@ jobs:
           coverage xml
         # TODO: find workaroud to change this allow failure
         # due unexpected success test (it means the test was success)
-        continue-on-error: true
+        continue-on-error: false
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v2
