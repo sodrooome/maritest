@@ -117,7 +117,7 @@ class TestHttpClient(unittest.TestCase):
             logger=False,
         )
 
-        self.assertRaises(NotImplementedError, request.method)
+        self.assertRaises(NotImplementedError, request.method)  # pragma: no cover
 
     def test_http_attribute(self):
         request = Http(

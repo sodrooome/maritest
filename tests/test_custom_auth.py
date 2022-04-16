@@ -83,6 +83,44 @@ class TestCustomAuth(unittest.TestCase):
         self.assertTrue(response.status_code, 200)
         self.assertTrue(response.json(), "'authenticated': True, 'user': 'user'")
 
+    @unittest.expectedFailure
+    def test_invalid_bearer_token(self):
+        with requests_mock.mock() as m:
+            m.get(
+                "https://httpbin.org/bearer",
+                request_headers={"Authorization": "Bearer 1234"},
+            )
+
+        bearer_auth = BearerAuth(1234) # invalid token
+        _ = requests.get("https://httpbin.org/bearer", auth=bearer_auth)  # pragma: no cover
+
+    @unittest.expectedFailure
+    def test_invalid_basic_token(self):
+        with requests_mock.mock() as m:
+            m.get(
+                "https://github.com",
+                request_headers={"Authorization": "Basic password token"},
+            )
+
+        basic_auth = BasicAuthToken(token=12345678) # invalid token
+        _ = requests.get("https://github.com", auth=basic_auth)  # pragma: no cover
+
+    @unittest.expectedFailure
+    def test_invalid_add_to_headers(self):
+        with requests_mock.mock() as m:
+            m.get(requests_mock.ANY, text="Invalid mock API Key Auth due invalid add to")
+
+        query_api_auth = ApiKeyAuth(add_to=1234, key="key1", value="value2")
+        _ = requests.get("https://github.com", auth=query_api_auth)  # pragma: no cover
+
+    @unittest.expectedFailure
+    def test_invalid_add_type_headers(self):
+        with requests_mock.mock() as m:
+            m.get(requests_mock.ANY, text="Invalid mock API Key Auth due invalid add to")
+
+        query_api_auth = ApiKeyAuth(add_to="query-params", key="key1", value="value2")
+        _ = requests.get("https://github.com", auth=query_api_auth)  # pragma: no cover
+
 
 if __name__ == "__main__":
     unittest.main()
