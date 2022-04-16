@@ -349,8 +349,7 @@ class TestHttpAssertion(unittest.TestCase):
             )
         request.assert_response_time_less(message="Response took much longer time")
         self.assertTrue(request.response.status_code, 200)
-    """
-
+    
     @expectedFailure
     def test_assert_status_code_in(self):
         request = Assert(
@@ -361,7 +360,8 @@ class TestHttpAssertion(unittest.TestCase):
             logger=False,
         )
         request.assert_status_code_in(status_code=[404, 403], message="expected failed")
-
+    
+    
     def test_invalid_dict_type(self):
         request = Assert(
             method="GET",
@@ -385,7 +385,7 @@ class TestHttpAssertion(unittest.TestCase):
         request.assert_text_to_equal(
             obj={"key": "value"}, message="Shouldn't be matching"
         )
-
+    """
 
 if __name__ == "__main__":
     unittest.main()
