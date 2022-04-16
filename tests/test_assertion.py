@@ -337,13 +337,13 @@ class TestHttpAssertion(unittest.TestCase):
 
     @expectedFailure
     def test_response_time_more_that_duration(self):
-        for index in range(100):
+        for index in range(5):
             request = Assert(
                 method="GET",
                 url=f"https://jsonplaceholder.typicode.com/posts/{index}",
                 headers={},
                 proxies=None,
-                logger=True
+                logger=False
             )
         request.assert_response_time_less(message="Response took much longer time")
         self.assertTrue(request.response.status_code, 200)
