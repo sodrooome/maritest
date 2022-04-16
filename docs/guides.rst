@@ -18,7 +18,14 @@ There are several ways for using this framework, the first one is when you send 
 
 **important keynotes** : argument for `method`, `url` and `headers` are required, so you'll expected to full fill all of them. If you feel that you don't need `headers` argument, you can fill it with empty `dict` .
 
-Other keynote is, the different usage when using `Assert` and `Http` method are when using the `Http` method, you will not be able to do assertion tests for the target because that method is an abstract base class for the `Assert` class. Other than that, the use of parameters and functions will remain the same
+Other keynote is, the different usage when using `Assert` and `Http` method are when using the `Http` method, you will not be able to do assertion tests for the target because that method is an abstract base class for the `Assert` class. Other than that, the use of parameters and functions will remain the same.
+For example if you mistakenly use assertion with `Http` class, then you will get `NotImplementedError` message like this :
+
+.. code-block:: bash
+
+    line 407, in assert_is_2xx_status
+        raise NotImplementedError
+    NotImplementedError
 
 There are several arguments / parameters that you can also pass it when making an HTTP request, and the mechanism itself is similar to when you use the requests package. those arguments consisted of :
 
@@ -113,3 +120,45 @@ Using proxy to request HTTP target. You can configure 1 instance of proxy reques
 
     >>> proxy = {"https": "https://github.com"}
     >>> request = Assert(method="GET", url="http://github.com/", proxy=proxy)
+
+Send request with data argument
+-------------------------------
+
+Send request to the HTTP target with data argument in the form of bytes, file-like object or dictionary. For example :
+
+.. code-block:: python
+
+    # samples.py
+    request = Http(
+        method="POST",
+        url="https://httpbin.org/post",
+        headers={},
+        files={"file": ("report.csv", "some,data,to,send\nanother,row,to,send\n")},
+        timeout=True,
+    )
+
+    request.assert_is_ok(message="request was OK!")
+
+Using query parameters
+----------------------
+
+You can also use a parameterized query to the given URL, such as :
+
+.. code-block:: python
+
+    payload_params = {"key1": "value1", "key2": "value2"}
+    request = Http(
+        method="GET",
+        url="https://httpbin.org/get",
+        headers={},
+        timeout=False,
+        params=payload_params,
+    )
+
+    # call the url object to
+    # returned full-path URL
+    print(request.response.url)
+    
+    # the result
+    >>> "https://httpbin.org/get?key1=value1&key2=value2"
+    

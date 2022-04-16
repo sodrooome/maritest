@@ -2,6 +2,8 @@
 Changelog
 =========
 
+All of this changelog are based on the release history like published in https://pypi.org/project/maritest/#history
+
 **v0.5.0 (development)**
 ------------------------
 

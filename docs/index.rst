@@ -82,3 +82,5 @@ For more detailed information of using **Maritest** please refer to the general 
    changelog
    upcoming
    references
+   examples
+   contributing

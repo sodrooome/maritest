@@ -23,6 +23,12 @@ Http Authentication
 .. automodule:: maritest.custom_auth
     :members:
 
+Http Assertion
+--------------
+
+.. automodule:: maritest.assertion
+    :members:
+
 Deprecation Utils
 -----------------
 
