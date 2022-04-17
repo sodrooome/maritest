@@ -54,7 +54,7 @@ for this example, you need to install **HtmlTestRunner** and you can see the fol
 Custom assertion method
 -----------------------
 
-You can also create your own custom assertion method according to your need or case. To do that, you need to inherit the `Http` class from the client module and wrap it with your new assertion method. For example :
+You can also create your own custom assertion method according to your need or case. To do that, you need to inherit the ``Http`` class from the client module and wrap it with your new assertion method. For example :
 
 .. code-block:: python
 

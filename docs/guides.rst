@@ -5,7 +5,7 @@ Guides
 General Usage
 -------------
 
-There are several ways for using this framework, the first one is when you send the request to the HTTP target, and this can be done by calling the `Assert` or `Http` method. Basic usage would be like this :
+There are several ways for using this framework, the first one is when you send the request to the HTTP target, and this can be done by calling the ``Assert`` or ``Http`` method. Basic usage would be like this :
 
 .. code-block:: python
 
@@ -15,11 +15,13 @@ There are several ways for using this framework, the first one is when you send 
     >>> request = Assert(method="GET", url="http://your-url", headers={})
     >>> request.assert_is_ok(message=None)
 
+.. admonition:: Keynote
+   :class: important
+    
+    argument for ``method``, ``url`` and ``headers`` are required, so you'll expected to full fill all of them. If you feel that you don't need ``headers`` argument, you can fill it with empty ``dict``.
 
-**important keynotes** : argument for `method`, `url` and `headers` are required, so you'll expected to full fill all of them. If you feel that you don't need `headers` argument, you can fill it with empty `dict` .
-
-Other keynote is, the different usage when using `Assert` and `Http` method are when using the `Http` method, you will not be able to do assertion tests for the target because that method is an abstract base class for the `Assert` class. Other than that, the use of parameters and functions will remain the same.
-For example if you mistakenly use assertion with `Http` class, then you will get `NotImplementedError` message like this :
+Other keynote is, the different usage when using ``Assert`` and ``Http`` method are when using the ``Http`` method, you will not be able to do assertion tests for the target because that method is an abstract base class for the ``Assert`` class. Other than that, the use of parameters and functions will remain the same.
+For example if you mistakenly use assertion with ``Http`` class, then you will get ``NotImplementedError`` message like this :
 
 .. code-block:: bash
 
@@ -56,6 +58,17 @@ Enable allow_redirects parameter. This will request other HTTP target if the exi
     >>> request = Assert(method="GET", url="http://your-url", allow_redirects=True)
 
 
+Setup custom HTTP headers
+-------------------------
+
+Same as like package **requests** did, you can also setup and configure custom HTTP Headers by passing it into ``headers`` argument in parameter as follow :
+
+.. code-block:: python
+
+    >>> headers = {"Content-Type": "application/json; charset=utf-8"}
+    >>> request = Assert(method="GET", url="https://your-url", headers=headers)
+
+
 Perform retry mechanism
 -----------------------
 
@@ -78,7 +91,7 @@ You eventually can see whether the retry function is being process or not by ena
 Using timeout to delay request
 ------------------------------
 
-Using `timeout` mechanism instead `retry`. By default the `timeout` parameter duration will be set to 120 seconds (or 2 minutes), but you can change it according to your needs. For example :
+Using ``timeout`` mechanism instead ``retry``. By default the ``timeout`` parameter duration will be set to 120 seconds (or 2 minutes), but you can change it according to your needs. For example :
     
 .. code-block:: python
 
@@ -88,7 +101,7 @@ Using `timeout` mechanism instead `retry`. By default the `timeout` parameter du
 Event hooks when error raises
 -----------------------------
 
-Enable `event_hooks` when requested HTTP target. This parameter only trigger if the HTTP target gives an error code like 404, if the event hook is not used, then on the client side it will only display the built-in exception that is already provided in Maritest. For example :
+Enable ``event_hooks`` when requested HTTP target. This parameter only trigger if the HTTP target gives an error code like 404, if the event hook is not used, then on the client side it will only display the built-in exception that is already provided in Maritest. For example :
 
 .. code-block:: python
 
@@ -96,6 +109,11 @@ Enable `event_hooks` when requested HTTP target. This parameter only trigger if 
     
     # when enable event_hooks, the output will be like this
     requests.exceptions.HTTPError: 404 Client Error: NOT FOUND for url: http://404-not-found
+
+    # when disable event_hooks, the output by default using exceptions
+    line 61, in assert_is_2xx_status
+        raise AssertionError(message)
+    AssertionError: The status not 2xx
 
 Suppressing warning message
 ---------------------------
@@ -121,10 +139,10 @@ Using proxy to request HTTP target. You can configure 1 instance of proxy reques
     >>> proxy = {"https": "https://github.com"}
     >>> request = Assert(method="GET", url="http://github.com/", proxy=proxy)
 
-Send request with data argument
--------------------------------
+Send request with multipart-encoded files
+-----------------------------------------
 
-Send request to the HTTP target with data argument in the form of bytes, file-like object or dictionary. For example :
+Send request to the HTTP target with ``files`` argument in the form of bytes, multiple file-like object or dictionary. For example :
 
 .. code-block:: python
 
@@ -138,6 +156,25 @@ Send request to the HTTP target with data argument in the form of bytes, file-li
     )
 
     request.assert_is_ok(message="request was OK!")
+
+Send request with encoded dict object
+-------------------------------------
+
+To achieve this, you can using ``json`` argument without need to encoded anymore. For example :
+
+.. code-block:: python
+
+    json_payload = {"key": "value"}
+
+    request = Http(
+        method="POST",
+        url="https://httpbin.org/post",
+        headers={},
+        json=json_payload,
+        timeout=True,
+    )
+
+    request.assert_has_json(message="Response should be has JSON!")
 
 Using query parameters
 ----------------------

@@ -31,13 +31,16 @@ Features
 --------
 
 - Extending usage when doing HTTP request
-- Easy-to-use thanks to `requests` library
+- Easy-to-use thanks to ``requests`` library
 - Built-in assertion to make easier when doing API testing
 
 Quick Usage
 -----------
 
-*Maritest well-tested on Python version 3.7 and above, you may still be able to use it with Python 3.7 below but it's expected there's backward compatibility that will happen*
+.. admonition:: Using Python 3.7 below?
+   :class: attention
+   
+   Maritest well-tested on Python version 3.7 and above, you may still be able to use it with Python 3.7 below but it's expected there's backward compatibility that will happen
 
 The installation can be done with :
 
@@ -53,24 +56,26 @@ After you're done with installation, you can try to use this basic feature from 
       from maritest.assertion import Assert
 
       request = Assert(
-         method="GET",                          
-         url="https://github.com/sodrooome",
-         headers={},
+         method="GET",                   # required, support 5 common HTTP method
+         url="https://api.services.com", # required
+         headers={},                     # required, set as empty dict if not needed
+         proxy={"http": "api.services"}, # not required, default set to None
+         timeout=60,                     # not required, default set to 120 seconds
       )
 
       # pick it up several method what kind of assertion that you wanted
-      # 1. Assert status code is 2xx
+      # 1. Assert request is success or not
       # 2. Assert request is failed or not
       # 3. Assert content-type of HTTP
       # 4. Assert response time when request HTTP
-      request.assert_status_is_2xx(message=None)
+      request.assert_is_ok(message="Request should be success")
       request.assert_is_failed(message="Shouldn't be failed")
       request.assert_is_content_type(message=None)
       request.assert_response_time(duration=300)
 
 Afterwards, wrap up that configuration and just run that file and it will automatically, the assertion testing process will execute without us needs to define the actual result or also set the expected result. If any of the assertion methods above it's fail, it will raise an error message.
 
-For more detailed information of using **Maritest** please refer to the general usage.
+For more detailed information of using **Maritest** please refer to the **Guides** page and **Assertion Usage**.
 
 .. toctree::
    :hidden:
@@ -79,8 +84,9 @@ For more detailed information of using **Maritest** please refer to the general 
    assertion
    authentication
    response
-   changelog
-   upcoming
    references
    examples
+   rationale
+   changelog
+   upcoming
    contributing

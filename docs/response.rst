@@ -17,9 +17,9 @@ With using maritest, we can also see the HTTP response object from what we have 
 
     json_response = request.retriever(format="json")
     multipart_response = request.retriever(format="multipart")
-    bytes_response = request.retriever(format="content")
+    bytes_response = request.retriever(format="text")
 
-In addition to the three HTTP responses, **Maritest** also provides a custom method to return a raw HTTP response, you can use it looks like this :
+In addition to the three HTTP responses, **Maritest** also provides a custom method to return a formatted raw HTTP response, you can use it looks like this :
 
 .. code-block:: python
 
@@ -74,7 +74,7 @@ In addition to the three HTTP responses, **Maritest** also provides a custom met
     Content-Encoding : gzip
     alt-svc : h3=":443"; ma=86400, h3-29=":443"; ma=86400
 
-Besides that, if you want to see how many times your HTTP target does redirection, you can use another method that called from the response module, to do this ensure that you also enabling the `allow_redirects` argument in parameter. For example :
+Besides that, if you want to see how many times your HTTP target does redirection, you can use another method that called from the response module, to do this ensure that you also enabling the ``allow_redirects`` argument in parameter. For example :
 
 .. code-block:: python
 
