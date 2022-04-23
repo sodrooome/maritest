@@ -321,6 +321,44 @@ class TestHttpClient(unittest.TestCase):
         )
         self.assertTrue(request.response.status_code, 200)
 
+    def test_retry_turn_off(self):
+        request = Http(
+            method="GET",
+            url="https://httpbin.org/get",
+            headers={},
+            timeout=True,
+            event_hooks=False,
+            logger=True,
+            supress_warning=False,
+            retry=False,  # turn off this retry to get log event
+        )
+        self.assertTrue(request.response.status_code, 200)
+
+    @expectedFailure
+    def test_event_hooks_enabled(self):
+        Http(
+            method="GET",
+            url="https://httpbin.org/deletee",
+            headers={},
+            timeout=True,
+            event_hooks=True,
+            logger=True,
+        )
+
+    def test_objects_equality(self):
+        # unittest for testing __eq__ method and equality
+        # of the Http object
+        first_http = Http(
+            method="GET", url="https://jsonplaceholder.typicode.com/posts/1", headers={}
+        )
+        second_http = Http(
+            method="GET", url="https://jsonplaceholder.typicode.com/posts/1", headers={}
+        )
+        self.assertEqual(first_http, first_http)
+        self.assertTrue(first_http != second_http)
+        self.assertIsInstance(first_http.url, str)
+        self.assertIsInstance(first_http.headers, dict)
+
 
 if __name__ == "__main__":
     unittest.main()

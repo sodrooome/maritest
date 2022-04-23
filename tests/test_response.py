@@ -51,5 +51,6 @@ class TestHttpResponse(unittest.TestCase):
         )
         response.retriever(format=1234)
 
+
 if __name__ == "__main__":
     unittest.main()

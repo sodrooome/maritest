@@ -121,6 +121,18 @@ class TestCustomAuth(unittest.TestCase):
 
         ApiKeyAuth(add_to="query-params", key="key1", value="value2")
 
+    def test_api_key_equality(self):
+        custom_api_key = ApiKeyAuth(
+            add_to="headers", key="key-1", value="value-1", header_name="Authorization"
+        )
+        # second_api_key = ApiKeyAuth(
+        #    add_to="headers", key="key-1", value="value-1", header_name="Authorization"
+        # )
+        # self.assertNotEqual(custom_api_key, second_api_key)
+        self.assertEqual(custom_api_key, custom_api_key)
+        self.assertIsInstance(custom_api_key.key, str)
+        self.assertIsInstance(custom_api_key.value, str)
+
 
 if __name__ == "__main__":
     unittest.main()
