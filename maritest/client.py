@@ -197,7 +197,7 @@ class Http:
             # enforcing headers always
             # wrap themselves with dict type
             # merge with pre-defined headers
-            self.headers = self.default_headers()
+            self.headers = self.default_headers()  # pragma: no cover
 
         # by default, using proxies only
         # for HTTPS over HTTP connection
@@ -313,7 +313,7 @@ class Http:
         if self.method and self.url is not None:
             return f"You're using Maritest with HTTP Request {self.url} | {self.method}"
         else:
-            return f"You're using Maritest without setup URL or HTTP verbs method"
+            return f"You're using Maritest without setup URL or HTTP verbs method"  # pragma: no cover
 
     def __repr__(self) -> str:
         return f"<Http:{self.method}=>{self.url}>"
@@ -364,7 +364,7 @@ class Http:
         Given default HTTP headers for maritest
         if headers argument wasn't set at the first time
         """
-        return CaseInsensitiveDict(
+        return CaseInsensitiveDict(  # pragma: no cover
             {
                 "User-Agent": f"maritest, {__version__}",
                 "Accept": "*/*",
