@@ -76,8 +76,10 @@ class ApiKeyAuth(AuthBase):
             raise ValueError("There's no option to add into API Key Auth")
 
     def __eq__(self, other) -> bool:
-        return all(
-            [self.key == getattr(other, "key"), self.value == getattr(other, "value")]
+        return (
+            isinstance(other, self.__class__)
+            and self.key == other.key
+            and self.value == other.value
         )
 
     def __call__(self, r: models.PreparedRequest) -> models.PreparedRequest:
