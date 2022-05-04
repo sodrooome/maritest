@@ -41,6 +41,12 @@ Factory Utils
 .. automodule:: maritest.utils.factory
     :members:
 
+Dictionary Utils
+----------------
+
+.. automodule:: maritest.utils.dict_lookups
+    :members:
+
 JSON Serializer
 ---------------
 

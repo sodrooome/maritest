@@ -32,7 +32,12 @@ author = 'Ryan Febriansyah'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx_rtd_theme', 'sphinx.ext.autodoc'
+    'sphinx_rtd_theme', 
+    'sphinx.ext.autodoc',
+    "myst_parser",
+    "sphinx_copybutton",
+    "sphinx_design",
+    "sphinx_inline_tabs",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

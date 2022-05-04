@@ -5,6 +5,11 @@ Assertion Usage
 Here are a collection of built-in assertion methods that have been provided by Maritest. The use of this assertion needs to be initiated from the Assert class instead.
 Basically, if the entire assertion or testing process against the HTTP target fails using the method below, it will raise an ``AssertionError``.
 
+.. admonition:: Important Keynote
+   :class: important
+
+   The built-in method for all these assertions has 1 required argument that needs to be filled, it call the argument for the ``message`` where this argument takes and will send the a brief of user message expectation after execute request.
+
 Assert request is ok
 --------------------
 

@@ -17,8 +17,8 @@ There are several ways for using this framework, the first one is when you send 
 
 .. admonition:: Keynote
    :class: important
-    
-    argument for ``method``, ``url`` and ``headers`` are required, so you'll expected to full fill all of them. If you feel that you don't need ``headers`` argument, you can fill it with empty ``dict``.
+   
+   argument for ``method``, ``url`` and ``headers`` are required, so you'll expected to full fill all of them. If you feel that you don't need ``headers`` argument, you can fill it with empty ``dict``.
 
 Other keynote is, the different usage when using ``Assert`` and ``Http`` method are when using the ``Http`` method, you will not be able to do assertion tests for the target because that method is an abstract base class for the ``Assert`` class. Other than that, the use of parameters and functions will remain the same.
 For example if you mistakenly use assertion with ``Http`` class, then you will get ``NotImplementedError`` message like this :
@@ -28,6 +28,16 @@ For example if you mistakenly use assertion with ``Http`` class, then you will g
     line 407, in assert_is_2xx_status
         raise NotImplementedError
     NotImplementedError
+
+Or you can also define the ``Assert`` with context manager by using ``with`` statement. With this, the request process will close its connection after the process is complete so it's a pretty convenient way to expressing try-catch exception in simplistic code
+
+.. code-block:: python
+
+    >>> from maritest.assertion import Assert
+    >>> request = Assert(method="GET", url="http://target-url", headers={})
+    >>> with request as resp:
+    ...     resp.assert_is_ok(message="Response must be success")
+    ...     resp.assert_is_failed(message="Response must not failed")
 
 There are several arguments / parameters that you can also pass it when making an HTTP request, and the mechanism itself is similar to when you use the requests package. those arguments consisted of :
 
@@ -129,6 +139,22 @@ Disable suppressed warning message about SSL certification. For this one particu
         warnings.warn(
     [WARNING] SSL verification status is disabled
 
+User authentication
+-------------------
+
+you can also use user authentication to target HTTP if needed, for that call ``auth`` argument into it and import module ``custom_auth`` to use the multiple types of HTTP authentication provided as follow :
+
+.. code-block:: python
+
+    # examples.py
+    from maritest.assert import Assert
+    from maritest.custom_auth import BasicAuth
+
+    basic_auth = BasicAuth(username="your-name", password="your-password")
+    request = Assert(method="POST", url="your-url-target", auth=basic_auth)
+
+To learn about and use different HTTP authentication please read the page about **Authentication**
+
 Proxy request to HTTP target
 ----------------------------
 
@@ -138,6 +164,24 @@ Using proxy to request HTTP target. You can configure 1 instance of proxy reques
 
     >>> proxy = {"https": "https://github.com"}
     >>> request = Assert(method="GET", url="http://github.com/", proxy=proxy)
+
+Send request with data argument
+-------------------------------
+
+Send request to the HTTP target with data as body information in the form of bytes, tuple or dictionary. For example :
+
+.. code-block:: python
+
+    >>> data_payload = {"key": "value"}
+    >>> request = Assert(method="POST", url="https://httpbin.org/post", headers={}, data=data_payload)
+
+there are some cases where you need to process the encoding of the JSON to a string object when using the data argument, for that you need to do dumping first before make request, such as :
+
+.. code-block:: python
+
+    >>> data_payload = {"key": "value"}
+    >>> json_dump = json.dumps(data_payload)
+    >>> request = Assert(method="POST", url="https://httpbin.org/post", headers={}, data=json_dump)
 
 Send request with multipart-encoded files
 -----------------------------------------
