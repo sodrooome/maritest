@@ -3,27 +3,23 @@ try:
 except ImportError as e:
     raise Exception(f"Unable to imported `requests` package {e}")
 
-# import json
-import logging
 import urllib.parse
 import warnings
 from abc import abstractmethod
 from contextlib import contextmanager
-from typing import Any, Tuple
+from typing import Tuple
 
 import urllib3
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry  # type: ignore
 from requests.sessions import CaseInsensitiveDict
 
-from .serializable import JsonSerializer
+from .utils.factory import Logger
 from .version import __version__
 
 # For our purposes,
 # its only supported 5 HTTP method
 ALLOWED_METHODS = ["GET", "PUT", "POST", "DELETE", "PATCH"]
-
-get_specific_logger = logging.getLogger("Maritest Logger")
 
 
 # TODO: separate this function calls
@@ -32,7 +28,7 @@ def disable_warnings():
     # thanks stack overflow see at: https://stackoverflow.com/questions/27981545/suppress-insecurerequestwarning
     # -unverified-https-request-is-being-made-in-pytho
     with warnings.catch_warnings():
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # type: ignore
         yield None
 
 
@@ -46,7 +42,7 @@ class Http:
         "GET", "POST", and other supported HTTP method
     :param url: base url for HTTP target, string type
     :param headers: HTTP content headers, by default always set to dict object
-    :param allow_redirects: Enable redirection to other 
+    :param allow_redirects: Enable redirection to other
         HTTP target if previous one wasn't respond it. set None
     :param logger: Logger stream handler with formatted
         output of message, by default set True
@@ -105,41 +101,17 @@ class Http:
         assert isinstance(url, str), "url schema must be string object"
         assert isinstance(headers, dict), "headers must be dict object"
 
+        # for right now, always set log_level into INFO
+        # to avoid getting error due partial conditional
+        # if-else statement in Logger factory class
         if logger:
-            self.logger = get_specific_logger
-            self.logger.propagate = False
-            self.logger.setLevel(logging.DEBUG)
-
-            # handler the logging event
-            # and write the standart output
-            logger_output = logging.StreamHandler()
-            logger_output.setLevel(logging.DEBUG)
-
-            # format the standart output
-            # with timestamp of event, class name and levels
-            logger_formatter = logging.Formatter(
-                fmt="%(asctime)s : %(name)s : %(funcName)s : %(message)s",
-                datefmt="%d-%m-%Y %I:%M:%S",
+            self.logger = Logger.get_logger(
+                url=self.url, method=self.method, log_level="INFO", silent=False
             )
-
-            logger_output.setFormatter(logger_formatter)
-            self.logger.addHandler(logger_output)
         else:
-            # if logger wasn't setup
-            # only get the specific logger name
-            self.logger = get_specific_logger
-            self.logger.propagate = True
-
-            logger_formatter = logging.Formatter(
-                fmt="%(asctime)s : %(name)s : %(funcName)s : %(message)s",
-                datefmt="%d-%m-%Y %I:%M:%S",
+            self.logger = Logger.get_logger(
+                url=self.url, method=self.method, log_level="INFO", silent=True
             )
-
-            # if disable the logger, will receive
-            # the maritest file log
-            logger_file = logging.FileHandler("maritest.log")
-            logger_file.setFormatter(logger_formatter)
-            self.logger.addHandler(logger_file)
 
         self.timeout = None
         self.response = None
@@ -179,9 +151,6 @@ class Http:
 
         if json is None:
             self.json = {}
-        else:
-            # printed JSON response with formatted output
-            self.json = JsonSerializer(object=self.json)
 
         # new attribute to call the request session instance
         # if session is emitted to None object, then should
@@ -258,6 +227,9 @@ class Http:
 
         try:
             with self.session as s:
+
+                self.http_log_request()
+
                 if retry:
                     self.retry = Retry(
                         total=3,
@@ -293,15 +265,14 @@ class Http:
             raise Exception(f"HTTP Request was error {e}")
         except KeyError as e:
             raise Exception(f"There's no any key to that HTTP response => {e}")
-        except json.JSONDecodeError as e:
+        except requests.exceptions.JSONDecodeError as e:
             raise Exception(f"Exception occur when try to unpack the JSON => {e}")
         except Exception as e:
             raise Exception(f"Other exception was occur {e}")
         finally:
             pass
 
-        self.logger.info(f"[INFO] HTTP Response {self.response.status_code}")
-        self.logger.debug(f"[DEBUG] HTTP Response Header {self.response.headers}")
+        self.http_log_response()
 
         if event_hooks:
             # if event hooks was set to True
@@ -331,7 +302,7 @@ class Http:
     def __enter__(self):
         return self
 
-    def __exit__(self):
+    def __exit__(self, exception_type, exception_value, traceback):
         # exit the connection pooling
         # after send the final request so
         # all HTTP response can't be
@@ -349,6 +320,23 @@ class Http:
         if self.created_session:
             self.session.close()
             self.created_session = False
+
+    def http_log_request(self):
+        """Log HTTP information when send request"""
+        self.logger.info("-- Maritest Logger --")
+        self.logger.info(f"[INFO] HTTP Request Information {self.method} => {self.url}")
+        self.logger.info(f"[INFO] HTTP Request Header => {self.headers}, {self.params}")
+
+    def http_log_response(self):
+        """Log HTTP response information after send request"""
+        self.logger.info(
+            f"[INFO] HTTP Response Status Code => {self.response.status_code}"
+        )
+        self.logger.info(f"[INFO] HTTP Response Header => {self.response.headers}")
+
+        # if response got other than 200, then also raise with the reason
+        if self.response.status_code != 200:
+            self.logger.info(f"[INFO] HTTP Response Reason => {self.response.reason}")
 
     @staticmethod
     def create_session(**kwargs):
