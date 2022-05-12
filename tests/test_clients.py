@@ -359,6 +359,16 @@ class TestHttpClient(unittest.TestCase):
         self.assertIsInstance(first_http.url, str)
         self.assertIsInstance(first_http.headers, dict)
 
+    def test_context_manager(self):
+        request = Http(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/1",
+            logger=False,
+            headers={},
+        )
+        with request as resp:
+            self.assertTrue(resp.response.status_code, 200)
+
 
 if __name__ == "__main__":
     unittest.main()
