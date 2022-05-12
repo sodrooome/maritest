@@ -2,7 +2,7 @@
 Assertion Usage
 ===============
 
-Here are a collection of built-in assertion methods that have been provided by Maritest. The use of this assertion needs to be initiated from the Assert class instead.
+Here are a collection of useful built-in assertion methods that have been provided by Maritest. The use of this assertion needs to be initiated from the Assert class instead.
 Basically, if the entire assertion or testing process against the HTTP target fails using the method below, it will raise an ``AssertionError``.
 
 .. admonition:: Important Keynote

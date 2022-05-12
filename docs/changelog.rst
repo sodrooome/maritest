@@ -4,8 +4,17 @@ Changelog
 
 All of this changelog are based on the release history like published in https://pypi.org/project/maritest/#history
 
-**v0.5.0 (development)**
+**v0.5.1 (Development)**
 ------------------------
+
+- [Fixed] Error raises when call ``__exit__`` using context manager
+- [Fixed] Can't decode into JSON format due conflicted with JSON serializer class
+- [Fixed] Exception error when caught invalid JSON format
+- [Fixed] Disabling ``logger`` argument not writing log information in files output
+- [Improvement] Separated between log information before-after send HTTP request
+
+**v0.5.0**
+----------
 
 - [Fixed] Attribute object of  ``auth``, ``data`` , ``params`` and ``files`` needs to be called in argument
 - [Fixed] Remove unused ``raise_for_status`` method when raise error

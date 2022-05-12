@@ -242,4 +242,36 @@ You can also use a parameterized query to the given URL, such as :
     
     # the result
     >>> "https://httpbin.org/get?key1=value1&key2=value2"
+
+Streaming requests to HTTP target
+---------------------------------
+
+You can also possibly to streaming media / files over HTTP target by enabling ``stream`` argument and call the ``streaming_requests()`` method. For example :
+
+.. code-block:: python
+
+    request = Http(
+        method="GET",
+        url="https://httpbin.org/stream/20",
+        headers={},
+        timeout=10,
+        logger=True,
+        stream=True # enable stream argument
+    )
+
+    # call this method
+    # block_size -> represent numbers of chunk size
+    # format -> represent type extension of file format
+    request.streaming_requests(block_size=1024, format="txt")
+
+    # the result
+    >>> 2.81kiB [00:00, 11.1kiB/s]11-05-2022 10:45:27 : client.py : streaming_requests : [INFO] Finished streaming requests
+
+There are several argument constructors that needed when calling the ``streaming_requests()`` method. Mandatory arguments are ``block_size`` and ``format``, while
+other arguments are optional such as ``decode`` and ``rate_limit``. If you streaming APIs to a large media size, then you can see the progress bar on your command line as below, this can happen thanks to ``tqdm`` package
+
+.. code-block:: python
+
+    11-05-2022 10:40:17 : client.py : streaming_requests : [INFO] Streaming requests over APIs ...
+    100%|██████████████████████████████████████████████████████████████████████▉| 10.5M/10.5M [00:17<00:00, 717kiB/s]11-05-2022 10:40:38 : client.py : streaming_requests : [INFO] Finished streaming requests
     
