@@ -75,7 +75,6 @@ class Logger:
         """
         Logger._logger = get_specific_logger
         Logger._logger.propagate = False
-        Logger._logger.setLevel(logging.DEBUG)
 
         logger_formatter = logging.Formatter(
             fmt="%(asctime)s : %(filename)s : %(funcName)s : %(message)s",
@@ -85,6 +84,9 @@ class Logger:
         http_handler = HttpHandler(url=url, method=method, disabled=False)
 
         if not silent:
+            for handler in logging.root.handlers[:]:
+                logging.root.removeHandler(handler)
+            logging.basicConfig(level=logging.INFO)
             http_handler.setFormatter(logger_formatter)
             Logger._logger.addHandler(http_handler)
         else:
