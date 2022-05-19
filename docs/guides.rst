@@ -5,7 +5,7 @@ Guides
 General Usage
 -------------
 
-There are several ways for using this framework, the first one is when you send the request to the HTTP target, and this can be done by calling the ``Assert`` or ``Http`` method. Basic usage would be like this :
+There are several ways for using this library, the first one is when you send the request to the HTTP target, and this can be done by calling the ``Assert`` or ``Http`` method. Basic usage would be like this :
 
 .. code-block:: python
 
@@ -39,12 +39,12 @@ Or you can also define the ``Assert`` with context manager by using ``with`` sta
     ...     resp.assert_is_ok(message="Response must be success")
     ...     resp.assert_is_failed(message="Response must not failed")
 
-There are several arguments / parameters that you can also pass it when making an HTTP request, and the mechanism itself is similar to when you use the requests package. those arguments consisted of :
+There are several arguments or parameters that you can also pass it when making an HTTP request, and the mechanism itself is similar to when you use the ``requests`` package. those arguments consisted of :
 
 Enable logger
 -------------
 
-Enable logger argument for stream handler the log request and response while doing HTTP request. This logger is used for debugging if an error occurs when making an assertion
+Enable ``logger`` argument for stream handler the log request and response while doing HTTP request. This logger is used for debugging if an error occurs when making an assertion
     
 .. code-block:: python
     
@@ -56,12 +56,15 @@ Enable logger argument for stream handler the log request and response while doi
     08-02-2022 12:14:27 : Maritest Logger : __init__ : [INFO] HTTP Response 200
     
     
-**important keynote** : if you tend to disabled the logger argument, you will receive a response log file in your local, the file name is “maritest.log”
+.. admonition:: Keynote
+   :class: important
+   
+   if you tend to disabled the logger parameter, you will receive a response log file in your local, the file name is “maritest.log”
 
 Allow redirections for HTTP
 ---------------------------
 
-Enable allow_redirects parameter. This will request other HTTP target if the existing or previous one wasn't respond yet.
+Enable ``allow_redirects`` parameter. This will request other HTTP target if the existing or previous one wasn't respond yet.
 
 .. code-block:: python
 
@@ -71,7 +74,7 @@ Enable allow_redirects parameter. This will request other HTTP target if the exi
 Setup custom HTTP headers
 -------------------------
 
-Same as like package **requests** did, you can also setup and configure custom HTTP Headers by passing it into ``headers`` argument in parameter as follow :
+Same as like package ``requests`` did, you can also setup and configure custom HTTP Headers by passing it into ``headers`` argument in parameter as follow :
 
 .. code-block:: python
 
@@ -82,7 +85,7 @@ Same as like package **requests** did, you can also setup and configure custom H
 Perform retry mechanism
 -----------------------
 
-Enable retry parameter to retry and send HTTP request again. Particularly, i do not recommend use this method due it will slowing down the performance process. For example :
+Enable ``retry`` parameter to retry and send HTTP request again. Particularly, i do not recommend use this method due it will slowing down the performance process. For example :
 
 .. code-block:: python
 
@@ -153,7 +156,7 @@ you can also use user authentication to target HTTP if needed, for that call ``a
     basic_auth = BasicAuth(username="your-name", password="your-password")
     request = Assert(method="POST", url="your-url-target", auth=basic_auth)
 
-To learn about and use different HTTP authentication please read the page about **Authentication**
+To learn about and use different HTTP authentication please read the page about `Authentication <https://maritest.readthedocs.io/en/latest/authentication.html>`_
 
 Proxy request to HTTP target
 ----------------------------
@@ -270,7 +273,7 @@ You can also possibly to streaming media / files over HTTP target by enabling ``
 There are several argument constructors that needed when calling the ``streaming_requests()`` method. Mandatory arguments are ``block_size`` and ``format``, while
 other arguments are optional such as ``decode`` and ``rate_limit``. If you streaming APIs to a large media size, then you can see the progress bar on your command line as below, this can happen thanks to ``tqdm`` package
 
-.. code-block:: python
+.. code-block:: bash
 
     11-05-2022 10:40:17 : client.py : streaming_requests : [INFO] Streaming requests over APIs ...
     100%|██████████████████████████████████████████████████████████████████████▉| 10.5M/10.5M [00:17<00:00, 717kiB/s]11-05-2022 10:40:38 : client.py : streaming_requests : [INFO] Finished streaming requests

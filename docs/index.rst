@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Maritest Docs
-=============
+Maritest
+========
 
 .. image:: https://github.com/sodrooome/maritest/actions/workflows/test.yml/badge.svg
    :target: https://github.com/sodrooome/maritest/actions/workflows/test.yml/badge.svg
@@ -25,7 +25,7 @@ Maritest Docs
 Summary
 -------
 
-**Maritest** is an API testing framework that the purpose's solely to simplifying assertion when doing testing in API layer, it's an easy and convenient way to go iterative testing while keep up the fast-paced development and be able to maintain all testing modules / scenarios without breaking change
+**Maritest** is an API testing library that the purpose's solely to simplifying assertion when doing testing in API layer, it's an easy and convenient way to go iterative testing while keep up the fast-paced development and be able to maintain all testing modules / scenarios without breaking change
 
 Features
 --------
@@ -33,6 +33,7 @@ Features
 - Extending usage when doing HTTP request
 - Easy-to-use thanks to ``requests`` library
 - Built-in assertion to make easier when doing API testing
+- Support common HTTP authentication
 
 Quick Usage
 -----------
@@ -56,11 +57,11 @@ After you're done with installation, you can try to use this basic feature from 
       from maritest.assertion import Assert
 
       request = Assert(
-         method="GET",                   # required, support 5 common HTTP method
-         url="https://api.services.com", # required
-         headers={},                     # required, set as empty dict if not needed
-         proxy={"http": "api.services"}, # not required, default set to None
-         timeout=60,                     # not required, default set to 120 seconds
+         method="GET",                                       # required, support 5 common HTTP method
+         url="https://jsonplaceholder.typicode.com/todos/1", # required
+         headers={},                                         # required, set as empty dict if not needed
+         proxy={"http": "api.services"},                     # not required, default set to None
+         timeout=60,                                         # not required, default set to 120 seconds
       )
 
       # pick it up several method what kind of assertion that you wanted
@@ -75,7 +76,7 @@ After you're done with installation, you can try to use this basic feature from 
 
 Afterwards, wrap up that configuration and just run that file and it will automatically, the assertion testing process will execute without us needs to define the actual result or also set the expected result. If any of the assertion methods above it's fail, it will raise an error message.
 
-For more detailed information of using **Maritest** please refer to the **Guides** page and **Assertion Usage**.
+For more detailed information of using **Maritest** please refer to the `Guides <https://maritest.readthedocs.io/en/latest/guides.html>`_ page and `Assertion Usage <https://maritest.readthedocs.io/en/latest/assertion.html>`_.
 
 .. toctree::
    :hidden:
@@ -86,7 +87,7 @@ For more detailed information of using **Maritest** please refer to the **Guides
    response
    references
    examples
-   rationale
    changelog
    upcoming
    contributing
+   rationale

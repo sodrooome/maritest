@@ -2,7 +2,7 @@
 Further Examples 
 ================
 
-Some collection of further examples related to using **Maritest** framework
+Some collection of further examples related to using **Maritest**
 
 Generate tests report
 ---------------------

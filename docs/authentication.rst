@@ -2,7 +2,7 @@
 Authentication
 ==============
 
-**Maritest** has also provided several methods to use user authentication when making requests to the HTTP target. Basically, this framework support common user authentication like
+**Maritest** has also provided several methods to use user authentication when making requests to the HTTP target. Basically, this library support common user authentication like
 
 - ``BasicAuth``
 - ``DigestAuth``
