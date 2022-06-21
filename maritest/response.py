@@ -1,6 +1,6 @@
 from abc import ABC
-from json.decoder import JSONDecodeError
 import textwrap
+import requests
 
 from .client import Http
 
@@ -13,29 +13,29 @@ class Response(Http, ABC):
     Http Client in maritest.client module
     """
 
-    def retriever(self, format: str = "json"):
+    def retriever(self, fmt: str = "json"):
         """
         Collective method to retrieve HTTP response
         and returned as related argument ex: json,
-        multipart and text
+        content and text
 
-        :param format: Parameter for choose what kind
+        :param fmt: Parameter for choose what kind
             of response that want to returned, by default
             set as JSON
 
         Returned formatted HTTP response
         """
-        if not type(format):
+        if not type(fmt):
             raise TypeError(
                 "Parameter format must be string object"
             )  # pragma: no cover
 
-        if format.lower() not in ["multipart", "text", "json"]:
+        if fmt.lower() not in ["content", "text", "json"]:
             raise NotImplementedError("There's no format that match with argument")
 
         try:
             if self.response.status_code == 200:
-                if format.lower() == "json":
+                if fmt.lower() == "json":
                     json_response = self.response.json()
                     response_body = {
                         "response_body": json_response,
@@ -45,10 +45,10 @@ class Response(Http, ABC):
                         "response_headers": self.response.headers,
                         "is_json": True,
                     }
-                elif format.lower() == "multipart":
+                elif fmt.lower() == "content":
                     part_response = self.response.content
                     response_body = part_response.decode()
-                elif format.lower() == "text":
+                elif fmt.lower() == "text":
                     response_body = self.response.text, self.response.encoding
                 else:
                     # need request body to debug when the
@@ -71,7 +71,7 @@ class Response(Http, ABC):
                 print(response_body)
             else:
                 print((None, self.response.status_code))
-        except JSONDecodeError as e:
+        except requests.exceptions.JSONDecodeError as e:
             raise Exception(f"Unable to decode the HTTP response {e}")
         except Exception as e:
             raise Exception(f"Another exception was occurs {e}")
@@ -99,7 +99,7 @@ class Response(Http, ABC):
 
         print(f"Count history : {response_count}", response_body)
 
-    def http_response(self, *args, **kwargs):
+    def http_response(self):
         """
         Formatted HTTP response as raw format (text)
         """
