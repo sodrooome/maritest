@@ -23,7 +23,7 @@ class TestHttpResponse(unittest.TestCase):
         response = Response(
             method="GET",
             url="http://github.com/",
-            headers=None,
+            headers={},
             allow_redirects=True,
             logger=True,
         )
@@ -34,7 +34,7 @@ class TestHttpResponse(unittest.TestCase):
         response = Response(
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/1",
-            headers=None,
+            headers={},
             proxies=None,
             logger=False,
         )
