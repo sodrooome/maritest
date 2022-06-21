@@ -6,14 +6,14 @@ class TestHttpResponse(unittest.TestCase):
     def test_http_response_format(self):
         response = Response(
             method="GET",
-            url="https://jsonplaceholder.typicode.com/posts",
+            url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
             proxies=None,
             logger=False,
         )
-        response.retriever(format="json")
-        response.retriever(format="multipart")
-        response.retriever(format="text")
+        response.retriever(fmt="json")
+        response.retriever(fmt="content")
+        response.retriever(fmt="text")
 
         # no redirection, just checking the other output
         response.history_response()
@@ -23,9 +23,9 @@ class TestHttpResponse(unittest.TestCase):
         response = Response(
             method="GET",
             url="http://github.com/",
-            headers={"some_key": "some_value"},
+            headers=None,
             allow_redirects=True,
-            logger=False,
+            logger=True,
         )
         response.history_response()
 
@@ -33,23 +33,23 @@ class TestHttpResponse(unittest.TestCase):
     def test_invalid_format_argument(self):
         response = Response(
             method="GET",
-            url="https://jsonplaceholder.typicode.com/posts",
-            headers={"some_key": "some_value"},
+            url="https://jsonplaceholder.typicode.com/posts/1",
+            headers=None,
             proxies=None,
             logger=False,
         )
-        response.retriever(format="headers")
+        response.retriever(fmt="headers")
 
     @unittest.expectedFailure
     def test_invalid_type_argument(self):
         response = Response(
             method="GET",
-            url="https://jsonplaceholder.typicode.com/posts",
+            url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
             proxies=None,
             logger=False,
         )
-        response.retriever(format=1234)
+        response.retriever(fmt=1234)
 
 
 if __name__ == "__main__":

@@ -49,7 +49,7 @@ class TestHttpClient(unittest.TestCase):
             headers={"some_key": "some_value"},
             json=request_body,
             logger=False,
-            timeout=True,
+            timeout=3,
         )
         self.assertEqual("POST", request.method)
         self.assertEqual(201, request.response.status_code)
@@ -135,10 +135,41 @@ class TestHttpClient(unittest.TestCase):
         self.assertFalse(request.suppress_warning)  # validate this param set to True
         self.assertTrue(request.logger)
 
+    def test_random_timeout(self):
+        request = Http(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/1",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=True,
+            timeout=None
+        )
+        timeout = request.random_timeout()
+        self.assertIsInstance(timeout, float)
+
+    def test_http_property(self):
+        request = Http(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/1",
+            headers={"some_key": "some_value"},
+            proxies=None,
+            logger=False,
+            timeout=3
+        )
+        self.assertTrue(request.get_url)
+        self.assertTrue(request.get_json)
+        self.assertTrue(request.get_text)
+        self.assertTrue(request.get_content)
+        self.assertTrue(request.get_duration)
+        self.assertTrue(request.get_status_code)
+        self.assertTrue(request.get_headers)
+        self.assertIsNotNone(request.get_cookies)
+        self.assertIsInstance(request.get_history, list)
+
     def test_mock_http_method(self):
         mock_method = MockMethod(
             method="GET",
-            url="https://jsonplaceholder.typicode.com/posts",
+            url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
             proxies=None,
             logger=False,
@@ -150,7 +181,7 @@ class TestHttpClient(unittest.TestCase):
 
         request = Http(
             method="GET",
-            url="https://jsonplaceholder.typicode.com/posts",
+            url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
             logger=False,
         )
@@ -160,12 +191,12 @@ class TestHttpClient(unittest.TestCase):
         # not the real assertion method in Assert class
         with self.assertRaises(NotImplementedError):
             request.assert_is_failed("failed")
-            request.assert_is_ok("supposed to be ok, but failed")
+            request.assert_is_ok("supposed to be ok, but failed")  # pragma: no cover
 
     def test_http_basic_auth(self):
         request = Http(
             method="GET",
-            url="https://jsonplaceholder.typicode.com/posts",
+            url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
             logger=False,
             auth=BasicAuth("this is some username", "this is some password"),
@@ -175,7 +206,7 @@ class TestHttpClient(unittest.TestCase):
     def test_http_digest_auth(self):
         request = Http(
             method="GET",
-            url="https://jsonplaceholder.typicode.com/posts",
+            url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
             logger=False,
             auth=DigestAuth("some username", "some password"),
@@ -185,7 +216,7 @@ class TestHttpClient(unittest.TestCase):
     def test_http_token_auth(self):
         request = Http(
             method="GET",
-            url="https://jsonplaceholder.typicode.com/posts",
+            url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
             logger=False,
             auth=BasicAuthToken(token="some key of token"),
@@ -195,7 +226,7 @@ class TestHttpClient(unittest.TestCase):
     def test_http_bearer_auth(self):
         request = Http(
             method="GET",
-            url="https://jsonplaceholder.typicode.com/posts",
+            url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
             logger=False,
             auth=BearerAuth(token="some bearer token"),
@@ -205,7 +236,7 @@ class TestHttpClient(unittest.TestCase):
     def test_http_api_auth(self):
         request = Http(
             method="GET",
-            url="https://jsonplaceholder.typicode.com/posts",
+            url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
             logger=False,
             auth=ApiKeyAuth(key="some key", value="some value", add_to="headers"),
@@ -221,7 +252,7 @@ class TestHttpClient(unittest.TestCase):
             url="https://httpbin.org/post",
             headers={},
             data={"some key": "some value"},
-            timeout=True,
+            timeout=3,
         )
         self.assertEqual(200, request.response.status_code)
 
@@ -231,7 +262,7 @@ class TestHttpClient(unittest.TestCase):
             url="https://httpbin.org/post",
             headers={},
             files={"file": ("report.csv", "some,data,to,send\nanother,row,to,send\n")},
-            timeout=True,
+            timeout=3,
         )
         self.assertEqual(200, request.response.status_code)
 
@@ -241,7 +272,7 @@ class TestHttpClient(unittest.TestCase):
             method="GET",
             url="https://httpbin.org/get",
             headers={},
-            timeout=False,
+            timeout=3,
             params=payload_params,
         )
 
@@ -257,7 +288,7 @@ class TestHttpClient(unittest.TestCase):
             method="POST",
             url="https://httpbin.org/post",
             headers={"content-type": "application/json"},
-            timeout=False,
+            timeout=3,
             params=payload_params,
             data=payload_data,
         )
@@ -270,7 +301,7 @@ class TestHttpClient(unittest.TestCase):
         request = Http(
             method="GET",
             url="http://github.com",
-            headers={},
+            headers={"User-Agent": "User Agent 1.0"},
             proxy={"https": "https://github.com"},
             retry=True,
         )
@@ -326,7 +357,7 @@ class TestHttpClient(unittest.TestCase):
             method="GET",
             url="https://httpbin.org/get",
             headers={},
-            timeout=True,
+            timeout=3,
             event_hooks=False,
             logger=True,
             supress_warning=False,
@@ -340,7 +371,7 @@ class TestHttpClient(unittest.TestCase):
             method="GET",
             url="https://httpbin.org/deletee",
             headers={},
-            timeout=True,
+            timeout=3,
             event_hooks=True,
             logger=True,
         )
@@ -368,6 +399,17 @@ class TestHttpClient(unittest.TestCase):
         )
         with request as resp:
             self.assertTrue(resp.response.status_code, 200)
+
+    @expectedFailure
+    def test_catch_timeout_exception(self):
+        request = Http(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/1",
+            logger=False,
+            headers={},
+            timeout=0.00125
+        )
+        self.assertTrue(request.timeout, 0.00125)  # pragma: no cover
 
 
 if __name__ == "__main__":
