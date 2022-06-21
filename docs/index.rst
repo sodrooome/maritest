@@ -31,7 +31,7 @@ Features
 --------
 
 - Extending usage when doing HTTP request
-- Easy-to-use thanks to ``requests`` library
+- Enrich and support logging for debug HTTP request
 - Built-in assertion to make easier when doing API testing
 - Support common HTTP authentication
 
@@ -89,5 +89,6 @@ For more detailed information of using **Maritest** please refer to the `Guides 
    examples
    changelog
    upcoming
+   compat
    contributing
    rationale

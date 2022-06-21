@@ -2,7 +2,7 @@
 HTTP Response
 =============
 
-With using maritest, we can also see the HTTP response object from what we have tested before. Basically HTTP responses can be split up into 3 categories, the first is in the form of bytes-like objects, the second is JSON format and the third is multipart. To get these three responses, you need to use the response module from maritest as follows :
+With using maritest, we can also see the HTTP response object from what we have tested before. Basically HTTP responses can be split up into 3 categories, the first is in the form of bytes-like objects, the second is JSON format and the third is content from server. To get these three responses, you need to use the response module from maritest as follows :
 
 .. code-block:: python
 
@@ -25,12 +25,12 @@ And afterwards you can using the built-in method ``retriever()`` in which there 
 HTTP Response Content
 ---------------------
 
-if you want to get the response content from the server that we are targeting then use the `multipart` format in the argument parameter :
+if you want to get the response content from the server that we are targeting then use the `content` format in the argument parameter :
 
 .. code-block:: python
 
     # same code like above
-    >>> request.retriever(format="multipart")
+    >>> request.retriever(format="content")
 
 By default, response content using this method will be encoding as ``utf-8`` but you can't change it with another format encoding, since this method is not a method property like ``requests`` do.
 

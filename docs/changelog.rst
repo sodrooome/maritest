@@ -4,8 +4,21 @@ Changelog
 
 All of this changelog are based on the release history like published in https://pypi.org/project/maritest/#history
 
-**v0.5.1 (Development)**
+**v0.6.0 (Development)**
 ------------------------
+
+- [Fixed] Change parameter option name of ``format`` to ``fmt`` in ``retriever`` method
+- [Fixed] Option to choose ``content`` response as argument when use ``retriever`` method
+- [Fixed] Attribute instance of ``timeout`` parameter can't be use
+- [Fixed] Duplicate logger stream output when enable ``logger`` parameter
+- [Added] New properties method to quick access HTTP response object
+- [Improvement] Change duration timeout into random numbers whenever set to ``None``
+- **[Known Issue]** Setup HTTP with proxy parameter sometimes will get error related to remote end close connection.
+- **[Known Issue]** Logger will run hierarchy in another function / class even though the logger has been disabled
+
+
+**v0.5.1**
+----------
 
 - [Fixed] Error raises when call ``__exit__`` using context manager
 - [Fixed] Can't decode into JSON format due conflicted with JSON serializer class
@@ -41,7 +54,7 @@ All of this changelog are based on the release history like published in https:/
 ----------
 
 - [Fixed] Missing validation when send request for ``files`` and ``json``
-- [Known Issue] Response got 400 status when send ``data`` with ``headers`` 
+- **[Known Issue]** Response got 400 status when send ``data`` with ``headers``
     
 **v0.3.1**
 ----------

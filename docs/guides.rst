@@ -39,7 +39,60 @@ Or you can also define the ``Assert`` with context manager by using ``with`` sta
     ...     resp.assert_is_ok(message="Response must be success")
     ...     resp.assert_is_failed(message="Response must not failed")
 
-There are several arguments or parameters that you can also pass it when making an HTTP request, and the mechanism itself is similar to when you use the ``requests`` package. those arguments consisted of :
+Usecase of property
+-------------------
+
+You can also use the properties method after sending the request, by using this property accessing to the response will be more simple and intuitive, this library provides various property methods that can be used including :
+
+.. code-block:: python
+
+    # get response of status code in integer format
+    >>> response = Assert(method="GET", url="https://jsonplaceholder.typicode.com/todos/1", headers={})
+    >>> response.get_status_code
+    ... 200
+
+    # get cookies, this example if the cookiejar is empty
+    >>> response.get_cookies
+    ... <RequestsCookieJar[]>
+
+    # get duration after send request in seconds
+    >>> response.get_status_code
+    ... 0.238111
+
+    # get full-path of url
+    >>> response.get_url
+    ... 'https://jsonplaceholder.typicode.com/todos/1'
+
+    # get response of headers
+    >>> response.get_headers
+    ... {'Date': 'Fri, 20 May 2022 03:00:28 GMT', 'Content-Type': 'application/json; charset=utf-8', ... }
+
+    # get content response from HTTP target
+    >>> response.get_content
+    ... b'{\n  "userId": 1,\n  "id": 1,\n  "title": "delectus aut autem",\n  "completed": false\n}'
+
+    # get text response such as bytes-like
+    >>> response.get_text
+    ... '{\n  "userId": 1,\n  "id": 1,\n  "title": "delectus aut autem",\n  "completed": false\n}'
+
+    # get HTTP response that wrapped as JSON format
+    >>> response.get_json
+    ... {'userId': 1, 'id': 1, 'title': 'delectus aut autem', 'completed': False}
+
+    # get history of redirection if occurred
+    >>> response.get_history
+    ... []
+
+Since these property method will return a something of value, so to represent it as a formatted string or make it as human readable, you need to replace it with a callable function and wrap it as the print statement and turn out something like this :
+
+.. code-block:: python
+
+    >>> request = Assert(method="GET", url="https://jsonplaceholder.typicode.com/todos/1", headers={})
+    >>> response = request.get_duration
+    >>> print(response)
+    ... 0.224932
+
+In addition to using the properties method, there are several arguments or parameters that you can also pass it when making an HTTP request, and the mechanism itself is similar to when you use the ``requests`` package. those arguments consisted of :
 
 Enable logger
 -------------
@@ -110,6 +163,8 @@ Using ``timeout`` mechanism instead ``retry``. By default the ``timeout`` parame
 
     >>> request = Assert(method="GET", url="http://your-url", timeout=None) # 120 secs
     >>> request = Assert(method="GET", url="http://your-url", timeout=60) # 1 minute
+
+Parameter of ``timeout`` only accept float or absolute integer format and cannot be set to 0 or less than 0, if you set less than 0 it will get an ``Exception`` error. Other than that, if timeout is set to ``None`` by default it will be set based on random timeout
     
 Event hooks when error raises
 -----------------------------
