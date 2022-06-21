@@ -3,9 +3,6 @@ import requests
 from enum import Enum
 
 
-get_specific_logger = logging.getLogger("Maritest Logger")
-
-
 class LogEnum(str, Enum):
     """Enum class that represent for Log level"""
 
@@ -52,8 +49,6 @@ class HttpHandler(logging.Handler):
 class Logger:
     """Private class for logger factory"""
 
-    _logger = None  # instance variable
-
     @staticmethod
     def __set_logger(
         url: str, method: str, log_level: str = None, silent: bool = False
@@ -73,8 +68,7 @@ class Logger:
             then it will send as file log (maritest.log) if not,
             then it will shown as STDOUT
         """
-        Logger._logger = get_specific_logger
-        Logger._logger.propagate = False
+        get_specific_logger = logging.getLogger("Maritest Logger")
 
         logger_formatter = logging.Formatter(
             fmt="%(asctime)s : %(filename)s : %(funcName)s : %(message)s",
@@ -86,26 +80,26 @@ class Logger:
         if not silent:
             for handler in logging.root.handlers[:]:
                 logging.root.removeHandler(handler)
-            logging.basicConfig(level=logging.INFO)
             http_handler.setFormatter(logger_formatter)
-            Logger._logger.addHandler(http_handler)
+            get_specific_logger.addHandler(http_handler)
+            get_specific_logger.propagate = False
         else:
-            Logger._logger.propagate = True
             logger_file = logging.FileHandler("maritest.log")
             logger_file.setFormatter(logger_formatter)
-            Logger._logger.addHandler(logger_file)
+            get_specific_logger.addHandler(logger_file)
+            get_specific_logger.propagate = False
 
         # same with this expression, do i need
         # keep this since the default of setLevel
         # will set into static values while initiate
         # in Http logger attribute
         if log_level == LogEnum.INFO:
-            Logger._logger.setLevel(logging.INFO)
+            get_specific_logger.setLevel(logging.INFO)
         elif log_level == LogEnum.DEBUG:
-            Logger._logger.setLevel(logging.DEBUG)
+            get_specific_logger.setLevel(logging.DEBUG)
         elif log_level == LogEnum.WARNING:
-            Logger._logger.setLevel(logging.WARNING)
-        return Logger._logger
+            get_specific_logger.setLevel(logging.WARNING)
+        return get_specific_logger
 
     @staticmethod
     def get_logger(url: str, method: str, log_level: str = None, silent: bool = None):
