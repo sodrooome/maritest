@@ -5,14 +5,15 @@ except ImportError as e:
 
 import urllib.parse
 import warnings
+import random
 from abc import abstractmethod
 from contextlib import contextmanager
-from typing import Tuple
+from typing import Tuple, Optional, Any
 
 import urllib3
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry  # type: ignore
-from requests.sessions import CaseInsensitiveDict
+from requests.sessions import CaseInsensitiveDict, RequestsCookieJar
 
 from .utils.factory import Logger
 from .version import __version__
@@ -69,6 +70,9 @@ class Http:
         default set to None.
     :param json: argument for sending a request in HTTP body
         with JSON-format. By default set to None or optional
+    :param timeout: parameter to setup timeout argument whenever
+        request is failed, the initial duration of timeout
+        is random values, by default set to None or optional
 
     Returned as HTTP response object
     """
@@ -89,6 +93,7 @@ class Http:
         files: dict = None,
         auth: Tuple = None,
         json: dict = None,
+        timeout: Optional[float] = None,
         **kwargs,
     ) -> None:
         # missing attributes :
@@ -130,9 +135,10 @@ class Http:
         self.session = None
         self.auth = auth
         self.created_session = False  # flagging to close request session
+        self.timeout = timeout
 
-        if self.timeout is None:
-            self.timeout = 120
+        if timeout is None:
+            self.timeout = self.random_timeout()
 
         if method is not None:
             self.method = method.upper()
@@ -337,6 +343,58 @@ class Http:
         # if response got other than 200, then also raise with the reason
         if self.response.status_code != 200:
             self.logger.info(f"[INFO] HTTP Response Reason => {self.response.reason}")
+
+    @staticmethod
+    def random_timeout() -> float:
+        """Internal method to generate random timeout in 1-4 seconds
+        of interval and returned as floating number
+        """
+        return float(random.uniform(1, 4))
+
+    @property
+    def get_json(self) -> Any:
+        """Property method to return response in JSON format"""
+        return self.response.json()
+
+    @property
+    def get_status_code(self) -> int:
+        """Property method to return response in integer of status code"""
+        return self.response.status_code
+
+    @property
+    def get_url(self) -> str:
+        """Property method to return full-path of URL"""
+        return self.response.url
+
+    @property
+    def get_headers(self) -> CaseInsensitiveDict:
+        """Property method to return response headers in dict format"""
+        return self.response.headers
+
+    @property
+    def get_history(self) -> list:
+        """Property method to return HTTP redirection history"""
+        return self.response.history
+
+    @property
+    def get_cookies(self) -> RequestsCookieJar:
+        """Property method to return cookies jar response"""
+        return self.response.cookies
+
+    @property
+    def get_content(self) -> bytes:
+        """Property method to return content response from server"""
+        return self.response.content
+
+    @property
+    def get_text(self) -> str:
+        """Property method to return content response in unicode"""
+        return self.response.text
+
+    @property
+    def get_duration(self) -> float:
+        """Property method to return total of duration after send request in seconds"""
+        return self.response.elapsed.total_seconds()
 
     @staticmethod
     def create_session(**kwargs):
