@@ -6,13 +6,12 @@ except ImportError as e:
 import urllib.parse
 import warnings
 import random
+import urllib3
+
 from abc import abstractmethod
 from contextlib import contextmanager
 from typing import Tuple, Optional, Any
-
-import urllib3
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry  # type: ignore
 from requests.sessions import CaseInsensitiveDict, RequestsCookieJar
 
 from .utils.factory import Logger
@@ -27,7 +26,7 @@ ALLOWED_METHODS = ["GET", "PUT", "POST", "DELETE", "PATCH"]
 @contextmanager
 def disable_warnings():
     # thanks stack overflow see at: https://stackoverflow.com/questions/27981545/suppress-insecurerequestwarning
-    # -unverified-https-request-is-being-made-in-pytho
+    # -unverified-https-request-is-being-made-in-python
     with warnings.catch_warnings():
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # type: ignore
         yield None
@@ -55,8 +54,6 @@ class Http:
         set False, will suppressed warning message
     :param proxy: HTTP proxies configuration, by default
         always set to None, and must be configured in HTTPS
-    :param kwargs: given by keyword argument for allow_redirects
-        or timeout
     :param auth: Authentication configuration for using
         HTTP client, by default set to None
     :param data: Append file like object in the request body,
@@ -81,58 +78,45 @@ class Http:
         self,
         method: str,
         url: str,
-        headers: dict,
-        allow_redirects: bool = None,
         logger: bool = True,
         event_hooks: bool = False,
         retry: bool = True,
-        supress_warning: bool = None,
-        proxy: dict = None,
-        data: dict = None,
-        params: dict = None,
-        files: dict = None,
-        auth: Tuple = None,
-        json: dict = None,
+        headers: Optional[dict] = None,
+        allow_redirects: Optional[bool] = None,
+        suppress_warning: Optional[bool] = None,
+        proxy: Optional[dict] = None,
+        data: Optional[dict] = None,
+        params: Optional[dict] = None,
+        files: Optional[dict] = None,
+        auth: Optional[Tuple] = None,
+        json: Optional[dict] = None,
         timeout: Optional[float] = None,
-        **kwargs,
     ) -> None:
-        # missing attributes :
-        # session, certs, file, json, data
-        self.method = method
+        self.event_hooks = event_hooks
+        self.retry = retry
+        self.method = method.upper()
         self.url = url
-        self.headers = headers
+        self.headers = headers or self.default_headers()
 
         assert isinstance(method, str), "method must be string object"
         assert isinstance(url, str), "url schema must be string object"
         assert isinstance(headers, dict), "headers must be dict object"
 
-        # for right now, always set log_level into INFO
-        # to avoid getting error due partial conditional
-        # if-else statement in Logger factory class
-        if logger:
-            self.logger = Logger.get_logger(
-                url=self.url, method=self.method, log_level="INFO", silent=False
-            )
-        else:
-            self.logger = Logger.get_logger(
-                url=self.url, method=self.method, log_level="INFO", silent=True
-            )
+        self.logger = Logger.get_logger(
+            url=self.url, method=self.method, log_level="INFO", silent=not logger
+        )
 
         self.timeout = None
         self.response = None
-        self.json = json
-        self.data = data
-        self.params = params
-        self.files = files
-        self.proxy = proxy
+        self.json = json or {}
+        self.data = data or {}
+        self.params = params or {}
+        self.files = files or {}
+        self.proxy = proxy or {}
         self.allow_redirects = allow_redirects
         self.stream = False
         self.cert = None
-        self.suppress_warning = (
-            supress_warning  # by default set to True due staging environment
-        )
-        self.verify = None
-        self.session = None
+        self.suppress_warning = suppress_warning
         self.auth = auth
         self.created_session = False  # flagging to close request session
         self.timeout = timeout
@@ -140,39 +124,18 @@ class Http:
         if timeout is None:
             self.timeout = self.random_timeout()
 
-        if method is not None:
-            self.method = method.upper()
-
         if self.method not in iter(ALLOWED_METHODS):
             raise NotImplementedError(f"Currently {self.method} method not supported")
-
-        if data is None:
-            self.data = {}
-
-        if params is None:
-            self.params = {}
-
-        if files is None:
-            self.files = {}
-
-        if json is None:
-            self.json = {}
 
         # new attribute to call the request session instance
         # if session is emitted to None object, then should
         # be called the create_session method to handling the request
-        if self.session is None:
-            self.session = self.create_session(**kwargs)
-
-        if self.response is None:
-            self.response = self.make_response()
-            self.created_session = True
-
-        if headers is None:
-            # enforcing headers always
-            # wrap themselves with dict type
-            # merge with pre-defined headers
-            self.headers = self.default_headers()  # pragma: no cover
+        self.session = requests.Session()
+        self.session.headers.update(self.headers)
+        self.session.auth = self.auth
+        self.session.params.update(self.params)
+        self.session.verify = not suppress_warning
+        self.created_session = True
 
         # by default, using proxies only
         # for HTTPS over HTTP connection
@@ -181,16 +144,12 @@ class Http:
                 raise ConnectionError(
                     "Proxy connection must be configured HTTPS over HTTP"
                 )
-            else:
-                # elsewhere, update the new conf
-                # for proxy before merge into request
-                # TODO: differentiate the sessions attribute itself
-                self.proxy = self.session.proxies.update(proxy)
+            self.proxy = self.session.proxies.update(proxy)
 
-        if supress_warning is not None:
-            if supress_warning:
+        if suppress_warning is not None:
+            if suppress_warning:
                 warnings.warn(
-                    "parameter `suppressed_warning` will be deprecated and no longer use in the next release "
+                    "parameter `suppress_warning` will be deprecated and no longer use in the next release "
                     "consider to add certification path instead or always enable the SSL verification issue "
                 )
                 self.suppress_warning = True
@@ -237,12 +196,9 @@ class Http:
                 self.http_log_request()
 
                 if retry:
-                    self.retry = Retry(
+                    self.retry = urllib3.util.Retry(
                         total=3,
                         status_forcelist=[429, 500, 502, 503, 504],
-                        method_whitelist=frozenset(
-                            {"DELETE", "GET", "HEAD", "OPTIONS", "PUT"}
-                        ),
                         backoff_factor=0.3,
                     )
                     adapter = HTTPAdapter(max_retries=self.retry)
@@ -258,25 +214,21 @@ class Http:
                     self.logger.info("[INFO] HTTP retry method might be turned it off")
                 self.response = s.send(request=prepare_request, **kwargs)
                 self.response.encoding = "utf-8"
-        except requests.exceptions.Timeout as e:
+        except requests.exceptions.Timeout as error:
             # temporary using requests exception
-            # TODO: make base class for custom exceptio
-            raise Exception(f"HTTP Request was timeout {e}")
+            # TODO: make base class for custom exception
+            raise Exception(f"HTTP Request was timeout {error}")
         except (
             requests.exceptions.SSLError,
             requests.exceptions.MissingSchema,
-        ) as e:
-            raise Exception(f"HTTP Request was invalid {e}")
-        except requests.exceptions.HTTPError as e:
-            raise Exception(f"HTTP Request was error {e}")
-        except KeyError as e:
-            raise Exception(f"There's no any key to that HTTP response => {e}")
-        except requests.exceptions.JSONDecodeError as e:
-            raise Exception(f"Exception occur when try to unpack the JSON => {e}")
-        except Exception as e:
-            raise Exception(f"Other exception was occur {e}")
-        finally:
-            pass
+        ) as error:
+            raise Exception(f"HTTP Request was invalid {error}")
+        except requests.exceptions.HTTPError as error:
+            raise Exception(f"HTTP Request was error {error}")
+        except KeyError as error:
+            raise Exception(f"There's no any key to that HTTP response => {error}")
+        except Exception as error:
+            raise Exception(f"Other exception was occur {error}")
 
         self.http_log_response()
 
@@ -309,20 +261,15 @@ class Http:
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        # exit the connection pooling
-        # after send the final request so
-        # all HTTP response can't be
-        # accessible again, so for example:
-        # if you tend to get the HTTP headers
-        # outside Http() class scope, you
-        # wont get any response for that
+        # exit the connection pooling after send the final request so
+        # all HTTP response can't be accessible again, so for example:
+        # if you tend to get the HTTP headers outside Http() class scope,
+        # you wont get any response for that
         self.response.close()
 
     def __del__(self):
-        # delete all adapters based on
-        # the request.session(),
-        # marked by flag instance of
-        # self.created_session attribute
+        # delete all adapters based on the request.session(),
+        # marked by flag instance of self.created_session attribute
         if self.created_session:
             self.session.close()
             self.created_session = False
@@ -397,14 +344,6 @@ class Http:
         return self.response.elapsed.total_seconds()
 
     @staticmethod
-    def create_session(**kwargs):
-        """Handling the session requests"""
-        session = requests.Session()
-        for key in kwargs:
-            setattr(session, key, kwargs[key])
-        return session
-
-    @staticmethod
     def default_headers():
         """
         Given default HTTP headers for maritest
@@ -418,15 +357,10 @@ class Http:
             }
         )
 
-    @staticmethod
-    def make_response():
-        """Handling the HTTP response object"""
-        return requests.Response()
-
     # this one act as an
     # instances for assertion tests
     # that have similar function like in pytest, unittest
-    # or in postman testscript. For example:
+    # or in postman test script. For example:
     # test_foo = Http().assert_is_ok()
     @abstractmethod
     def assert_is_ok(self, message: str):
