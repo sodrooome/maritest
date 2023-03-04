@@ -10,7 +10,6 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/postas",
             headers={"some_key": "some_value"},
-            proxies=None,
             logger=False,
         )
         request.assert_is_failed("should be failed")
@@ -21,7 +20,6 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts",
             headers={"some_key": "some_value"},
-            proxies=None,
             logger=False,
         )
         request.assert_is_2xx_status("Status was raised")
@@ -32,7 +30,6 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts",
             headers={"some_key": "some_value"},
-            proxies=None,
             logger=False,
         )
         request.assert_content_type_to_equal(
@@ -47,7 +44,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_has_content("yeah it has content")
@@ -60,7 +57,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_response_time(200, "should be not exceed the limit")
@@ -74,7 +71,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/100",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         expected_body = {
@@ -98,7 +95,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/100",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_dict_to_equal(
@@ -113,7 +110,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/postsa/100",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_is_3xx_status("supposed to be fail, but not receive 3xx status")
@@ -126,7 +123,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://httpbin.org/status/301",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
             allow_redirects=False,
         )
@@ -148,9 +145,10 @@ class TestHttpAssertion(unittest.TestCase):
         request = Assert(
             method="GET",
             url="http://github.com",
-            headers={},
+            headers={"User-Agent": "User Agent 1.0"},
             proxy={"https": "https://github.com"},
             retry=True,
+            logger=False
         )
         request.assert_is_3xx_status(f"Moved with github proxy")
         self.assertTrue(request.response.status_code, 301)
@@ -160,7 +158,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/100",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_response_time_less("Shouldn't be exceed the limit")
@@ -171,7 +169,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/100",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_expected_to_fail("This one is not failed, but must be pass")
@@ -182,6 +180,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
+            logger=False
         )
         request.assert_tls_secure()  # check without input success message argument
         request.assert_tls_secure(message="Success")
@@ -192,9 +191,71 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="http://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
+            logger=False
         )
         request.assert_tls_secure()
         self.assertTrue(request.url.startswith("http://"))
+
+    def test_assert_keys_in_response(self):
+        request = Assert(
+            method="GET",
+            url="http://jsonplaceholder.typicode.com/posts/1",
+            headers={"some_key": "some_value"},
+            logger=False
+        )
+        request.assert_keys_in_response(keys=["userId"], message="There's key in response")
+        self.assertTrue(request.response.status_code, 200)
+
+    def test_assert_with_context_manager(self):
+        request = Assert(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/1",
+            logger=False,
+            headers={},
+        )
+        with request as resp:
+            resp.assert_is_2xx_status(message="Response is got 200 OK")
+
+    @expectedFailure
+    def test_assert_key_not_in_dict(self):
+        request = Assert(
+            method="GET",
+            url="https://jsonplaceholder.typicode.com/posts/1",
+            headers={"some_key": "some_value"},
+            proxy=None,
+            logger=False,
+        )
+        request.assert_keys_in_response(
+            keys=["Football"], message="Keys not in response"
+        )
+
+    def test_assert_xpath_data(self):
+        request = Assert(
+            method="GET",
+            url="http://blazedemo.com",
+            headers={},
+            logger=False
+        )
+        request.assert_xpath_data(query_path="/head/title", expected_data=[], message="Data is found in xpath")
+
+    def test_assert_link_data(self):
+        request = Assert(
+            method="GET",
+            url="http://blazedemo.com",
+            headers={},
+            logger=False
+        )
+        request.assert_link_data(expected_values="index.php", message="success")
+
+    @expectedFailure
+    def test_invalid_xpath_data(self):
+        request = Assert(
+            method="GET",
+            url="http://blazedemo.com",
+            headers={},
+            logger=False
+        )
+        request.assert_xpath_data(query_path="/head/title", expected_data="blazedemo", message="Data is not match")
 
     # TODO: find references to test socket-based
     # or certificate SSL without need to install
@@ -204,6 +265,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="httpa://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
+            logger=False
         )
 
     # im not sure why this test getting error,
@@ -214,6 +276,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
+            logger=False
         )
         request.assert_content_length()
 
@@ -227,7 +290,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://httpbin.org/status/404",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_is_ok(message="Not ok but success")
@@ -238,7 +301,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://httpbin.org/status/200",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_is_failed(message="Supposed to be failed but okay")
@@ -249,7 +312,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://httpbin.org/status/404",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_expected_to_fail(message="Already failed the request")
@@ -260,7 +323,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://httpbin.org/status/200",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_response_time(duration=0.1, message="Should exceed the limit")
@@ -271,7 +334,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://httpbin.org/status/200",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_is_4xx_status(message="Should be on 4xx status code")
@@ -282,7 +345,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://httpbin.org/status/200",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_is_5xx_status(message="Should be on 5xx status code")
@@ -293,7 +356,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://httpbin.org/status/400",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_is_2xx_status(message="Should be on 2xx status code")
@@ -304,7 +367,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         request.assert_content_type_to_equal(
@@ -317,7 +380,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/100",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         expected_body = {"empty-key": "empty-value"}
@@ -329,7 +392,7 @@ class TestHttpAssertion(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/100",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         expected_body_content = b'meu\\ratio ratio ratio"\n}'

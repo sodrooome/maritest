@@ -29,7 +29,7 @@ class TestHttpClient(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         self.assertEqual("GET", request.method)
@@ -53,7 +53,7 @@ class TestHttpClient(unittest.TestCase):
         )
         self.assertEqual("POST", request.method)
         self.assertEqual(201, request.response.status_code)
-        self.assertEqual(None, request.proxy)
+        self.assertEqual({}, request.proxy)
 
     def test_put_method(self):
         request_body = {
@@ -67,7 +67,7 @@ class TestHttpClient(unittest.TestCase):
             method="PUT",
             url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             json=request_body,
             logger=False,
         )
@@ -86,7 +86,7 @@ class TestHttpClient(unittest.TestCase):
             method="PATCH",
             url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             json=request_body,
             logger=False,
         )
@@ -98,7 +98,7 @@ class TestHttpClient(unittest.TestCase):
             method="DELETE",
             url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         self.assertEqual("DELETE", request.method)
@@ -113,7 +113,7 @@ class TestHttpClient(unittest.TestCase):
             method="OPTIONS",
             url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
-            proxies={"http": "http://google.com"},  # failed proxy
+            proxy={"http": "http://google.com"},  # failed proxy
             logger=False,
         )
 
@@ -124,7 +124,7 @@ class TestHttpClient(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         self.assertIn("", request.__str__())  # this one only checking for string type?
@@ -140,8 +140,8 @@ class TestHttpClient(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
-            proxies=None,
-            logger=True,
+            proxy=None,
+            logger=False,
             timeout=None
         )
         timeout = request.random_timeout()
@@ -152,7 +152,7 @@ class TestHttpClient(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
             timeout=3
         )
@@ -171,7 +171,7 @@ class TestHttpClient(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         self.assertTrue(mock_method.concrete_method())
@@ -253,6 +253,7 @@ class TestHttpClient(unittest.TestCase):
             headers={},
             data={"some key": "some value"},
             timeout=3,
+            logger=False
         )
         self.assertEqual(200, request.response.status_code)
 
@@ -263,6 +264,7 @@ class TestHttpClient(unittest.TestCase):
             headers={},
             files={"file": ("report.csv", "some,data,to,send\nanother,row,to,send\n")},
             timeout=3,
+            logger=False
         )
         self.assertEqual(200, request.response.status_code)
 
@@ -274,6 +276,7 @@ class TestHttpClient(unittest.TestCase):
             headers={},
             timeout=3,
             params=payload_params,
+            logger=False
         )
 
         expected_url = "https://httpbin.org/get?key1=value1&key2=value2"
@@ -291,6 +294,7 @@ class TestHttpClient(unittest.TestCase):
             timeout=3,
             params=payload_params,
             data=payload_data,
+            logger=False
         )
 
         expected_url = "https://httpbin.org/get?key1=value1&key2=value2"
@@ -304,6 +308,7 @@ class TestHttpClient(unittest.TestCase):
             headers={"User-Agent": "User Agent 1.0"},
             proxy={"https": "https://github.com"},
             retry=True,
+            logger=False
         )
         self.assertTrue(request.response.status_code, 200)
 
@@ -313,7 +318,7 @@ class TestHttpClient(unittest.TestCase):
             url="https://httpbin.org/stream/20",
             headers={},
             logger=True,
-            supress_warning=True,
+            suppress_warning=True,
         )
         self.assertTrue(request.suppress_warning, True)
         self.assertTrue(request.response.status_code, 200)
@@ -323,8 +328,8 @@ class TestHttpClient(unittest.TestCase):
             method="GET",
             url="https://httpbin.org/stream/20",
             headers={},
-            logger=True,
-            supress_warning=False,
+            logger=False,
+            suppress_warning=False,
         )
         self.assertFalse(request.suppress_warning, False)
         self.assertTrue(request.response.status_code, 200)
@@ -335,7 +340,7 @@ class TestHttpClient(unittest.TestCase):
             method="GET",
             url="https://httpbin.org/stream/20",
             headers={},
-            logger=True,
+            logger=False,
             proxy={"http": "http://httpbin.org/stream/20"},
         )
         self.assertTrue(request.proxy, True)  # pragma: no cover
@@ -347,7 +352,7 @@ class TestHttpClient(unittest.TestCase):
             method="POST",
             url="https://httpbin.org/post",
             headers={},
-            logger=True,
+            logger=False,
             json=json_payload,
         )
         self.assertTrue(request.response.status_code, 200)
@@ -359,8 +364,8 @@ class TestHttpClient(unittest.TestCase):
             headers={},
             timeout=3,
             event_hooks=False,
-            logger=True,
-            supress_warning=False,
+            logger=False,
+            suppress_warning=False,
             retry=False,  # turn off this retry to get log event
         )
         self.assertTrue(request.response.status_code, 200)
@@ -373,7 +378,7 @@ class TestHttpClient(unittest.TestCase):
             headers={},
             timeout=3,
             event_hooks=True,
-            logger=True,
+            logger=False,
         )
 
     def test_objects_equality(self):
@@ -388,7 +393,6 @@ class TestHttpClient(unittest.TestCase):
         self.assertEqual(first_http, first_http)
         self.assertTrue(first_http != second_http)
         self.assertIsInstance(first_http.url, str)
-        self.assertIsInstance(first_http.headers, dict)
 
     def test_context_manager(self):
         request = Http(

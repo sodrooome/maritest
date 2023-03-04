@@ -8,7 +8,7 @@ class TestHttpResponse(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         response.retriever(fmt="json")
@@ -25,7 +25,7 @@ class TestHttpResponse(unittest.TestCase):
             url="http://github.com/",
             headers={},
             allow_redirects=True,
-            logger=True,
+            logger=False,
         )
         response.history_response()
 
@@ -35,7 +35,7 @@ class TestHttpResponse(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/1",
             headers={},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         response.retriever(fmt="headers")
@@ -46,7 +46,7 @@ class TestHttpResponse(unittest.TestCase):
             method="GET",
             url="https://jsonplaceholder.typicode.com/posts/1",
             headers={"some_key": "some_value"},
-            proxies=None,
+            proxy=None,
             logger=False,
         )
         response.retriever(fmt=1234)
