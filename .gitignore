@@ -9,3 +9,5 @@ maritest.egg-info/
 _build/
 _static/
 _templates/
+coverage_html_report/
+maritest.log
