@@ -59,7 +59,7 @@ After you're done with installation, you can try to use this basic feature from 
       request = Assert(
          method="GET",                                       # required, support 5 common HTTP method
          url="https://jsonplaceholder.typicode.com/todos/1", # required
-         headers={},                                         # required, set as empty dict if not needed
+         headers={},                                         # not required, default set to empty dict
          proxy={"http": "api.services"},                     # not required, default set to None
          timeout=60,                                         # not required, default set to 120 seconds
       )

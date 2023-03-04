@@ -109,3 +109,55 @@ Sometimes you'll need caching the external API request after testing on it. In o
         response.assert_is_ok(message="should be success for all requests")
         response.assert_is_2xx_status(message="should be got 2xx status for all requests")
 
+Integrate within Web Framework
+------------------------------
+
+If you tend run Maritest on-top of your favorite web framework (such as: Django or Flask), you can do to that by simply
+write a instance class first for the Maritest wrapper, before it will be called in the APIs route.
+
+For example, in here we will try to implemented in Flask
+
+.. code-block:: python
+
+    # app.py
+    from flask import Flask, render_template, request
+    from maritest.assertion import Assert
+
+    app = Flask(__name__)
+
+    # define the instance class first for Maritest
+    class TestApiResponse:
+        def get_status_codes(self, url, method, headers, message):
+            assert_request = Assert(
+                method=method,
+                url=url,
+                headers=headers
+            )
+
+            resp = assert_request.assert_is_ok(message=message)
+            return response
+
+    # now, define your flask route's
+    @app.route("/", methods=["GET", "POST"])
+    def index():
+        if request.method == "POST":
+            url = request.form["url"]
+            method = request.form["method"]
+            message = request.form["message"]
+            headers = request.json
+            maritest_instance = TestApiResponse()
+            maritest_response = maritest_instance.get_status_codes(
+                url, method, headers, message
+            )
+
+            result = {"status_code": maritest_response.status_code, "data": maritest_response.json()}
+
+            # assuming that if you want to display the
+            # Maritest result in client-side
+            return render_template("index.html", result)
+        return render_template("index.html")
+
+    # now you can hit the Flask server and
+    # see the result
+    if __name__ == "__main__":
+        app.run(debug=True)

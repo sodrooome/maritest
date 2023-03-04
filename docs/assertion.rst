@@ -226,3 +226,51 @@ Test whether the TLS connection that has been made is secure, insecure or not va
 .. code-block:: python
 
     response.assert_tls_secure(message=None) # you can set as None-type of object
+
+Assert that key in JSON response
+--------------------------------
+
+Test whether key is valid and contain in JSON response. It allow us to search in nested JSON format for a example if
+we want to search key of "id" in simple JSON format we can use this method such as :
+
+.. code-block:: python
+
+    response = {"id": "Fabinho", "number": 4, ...}
+    response.assert_keys_in_response(keys=["id"], message="Key should be in JSON response")
+
+Or if you want to find occurrences key in nested dictionary, then you can use something like this :
+
+.. code-block:: python
+
+    response = {
+        "id": {
+            "name": "Fabinho"
+            "number": 4
+        },
+        "position": "Midfielder",
+        ...
+    }
+    response.assert_keys_in_response(keys=["id", "number"], message="That keys should be in JSON response")
+
+
+Assert expected values based on XPATH
+-------------------------------------
+
+Test if expected values it's contain HTTP response that contains HTML parts based on their ``XPATH``
+
+.. code-block:: python
+
+    query_path = "/head/title"
+    data = "Nothing's changed at all"
+    response.assert_xpath_data(query_path=query_path, expected_values=data, message="Should be equal")
+
+Assert expected values based on link
+------------------------------------
+
+Test if expected values it's contain in HTTP response that contains HTML parts based on the ``href`` link
+
+.. code-block:: python
+
+    data = ["https://github.com", "https://index.php"]
+    response.assert_link_data(expected_values=data, message="Should be equal")
+

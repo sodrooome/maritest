@@ -4,7 +4,7 @@ Changelog
 
 All of this changelog are based on the release history like published in https://pypi.org/project/maritest/#history
 
-**v0.6.0 (Development)**
+**v0.6.0**
 ------------------------
 
 - [Fixed] Change parameter option name of ``format`` to ``fmt`` in ``retriever`` method
@@ -13,6 +13,8 @@ All of this changelog are based on the release history like published in https:/
 - [Fixed] Duplicate logger stream output when enable ``logger`` parameter
 - [Added] New properties method to quick access HTTP response object
 - [Improvement] Change duration timeout into random numbers whenever set to ``None``
+- [Improvement] Major refactoring in core APIs for simplifying redundant and unused codes
+- [Improvement] ``headers`` parameter now is optional when try to request HTTP
 - **[Known Issue]** Setup HTTP with proxy parameter sometimes will get error related to remote end close connection.
 - **[Known Issue]** Logger will run hierarchy in another function / class even though the logger has been disabled
 
